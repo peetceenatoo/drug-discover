@@ -36,7 +36,7 @@ def foo(array, scale, num=None):
 
 # Don't remember why but the if statement in the following row is needed
 if __name__ == '__main__':
-    model_dir = "C:/Users/picci/AppData/Local/Programs/Python/Python310/Lib/site-packages/molecule_generation/tmp/MoLeR_checkpoint"
+    model_dir = "/model"
     example_smiles = ["CCC(C)NC(=O)COc1cccc(C)c1"]
 
     with load_model_from_directory(model_dir) as model:
