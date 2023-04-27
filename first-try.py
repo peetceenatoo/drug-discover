@@ -17,7 +17,7 @@ logging.getLogger('tensorflow').setLevel(logging.ERROR)
 from molecule_generation import load_model_from_directory
 import random
 import numpy as np
-from array import *
+import time
 
 # ---------------------------- Functions ---------------------------- #
 
@@ -29,10 +29,11 @@ def disturb(array, scale=1, num=None):
     random.shuffle(numbers)
     indexes = numbers[0:num]
     temp_embedding = array.copy()
+    np.random.seed(int(time.time()))
     for i in range(num):
         #taking magnitude of the element
         magnitude = 1.0
-        while(abs(temp_embedding[indexes[i]]*magnitude)<1.0):
+        while abs(temp_embedding[indexes[i]]*magnitude)<1.0 :
             magnitude = magnitude*10
         temp_embedding[indexes[i]] += np.random.normal(0,scale/magnitude*10)  
     return temp_embedding
@@ -46,7 +47,7 @@ if __name__ == '__main__':
     print(f"Encoded: {example_smiles}")
 
     with load_model_from_directory(model_dir) as model:
-        num_of_generated_molecules = 2
+        num_of_generated_molecules = 20
 
         # Process latent vector
         embeddings = model.encode(example_smiles)
@@ -54,9 +55,7 @@ if __name__ == '__main__':
         # Generate similar embeddings
         list_of_embeddings = []
         for i in range(num_of_generated_molecules):
-            print("Stampo l'array originale...\n", embeddings[0])
             list_of_embeddings.append(disturb(embeddings[0],1))
-            print("Stampo l'array modificato...\n", list_of_embeddings[i])
 
         # Decode without a scaffold constraint.
         # DO NOT PRINT ANYTHING HERE !!
