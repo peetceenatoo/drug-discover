@@ -17,57 +17,51 @@ logging.getLogger('tensorflow').setLevel(logging.ERROR)
 from molecule_generation import load_model_from_directory
 import random
 import numpy as np
+from array import *
 
 # ---------------------------- Functions ---------------------------- #
 
-def foo(array, scale, num=None):
+def disturb(array, scale=1, num=None):
     #np.random.seed(random.randint(-100000000,100000000))
     if num == None:
         num = len(array)
     numbers = [i for i in range(len(array))]
     random.shuffle(numbers)
     indexes = numbers[0:num]
+    temp_embedding = array.copy()
     for i in range(num):
-        array[indexes[i]] += np.random.normal(0,scale)
-    print("Stampo un array dentro a foo...\n", array)
-    return array
+        #taking magnitude of the element
+        magnitude = 1.0
+        while(abs(temp_embedding[indexes[i]]*magnitude)<1.0):
+            magnitude = magnitude*10
+        temp_embedding[indexes[i]] += np.random.normal(0,scale/magnitude*10)  
+    return temp_embedding
 
 # ------------------------------- Code ------------------------------- #
 
 # Don't remember why but the if statement in the following row is needed
 if __name__ == '__main__':
-    model_dir = "/model"
+    model_dir = "model"
     example_smiles = ["CCC(C)NC(=O)COc1cccc(C)c1"]
+    print(f"Encoded: {example_smiles}")
 
     with load_model_from_directory(model_dir) as model:
+        num_of_generated_molecules = 2
 
         # Process latent vector
         embeddings = model.encode(example_smiles)
-        print(f"Encoded: {example_smiles}")
 
-        # Generate 2 similar embeddings
+        # Generate similar embeddings
         list_of_embeddings = []
-        for i in range(2):
-            list_of_embeddings.append(foo(embeddings,0.01))
-            print("Stampo un array fuori da foo...\n", list_of_embeddings[i])
+        for i in range(num_of_generated_molecules):
+            print("Stampo l'array originale...\n", embeddings[0])
+            list_of_embeddings.append(disturb(embeddings[0],1))
+            print("Stampo l'array modificato...\n", list_of_embeddings[i])
 
         # Decode without a scaffold constraint.
         # DO NOT PRINT ANYTHING HERE !!
         with redirect_stdout(f):
-            list_of_decoded_smiles = []
-            for i in range(2):
-                list_of_decoded_smiles.append(model.decode(list_of_embeddings[i]))
+            list_of_decoded_smiles = model.decode(list_of_embeddings)
 
-        for i in range(2):
+        for i in range(num_of_generated_molecules):
             print("Decoded molecule n.{}: ".format(i+1), list_of_decoded_smiles[i])
-        
-
-
-    
-
-
-
-
-
-
-
