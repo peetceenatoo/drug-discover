@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "C:\Users\franc\Desktop\UNI\3°anno\PROGETTO 5CFU\drug-discover\features_plotter.py", line 99, in <module>
+    plt.show()  
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python310\lib\site-packages\matplotlib\pyplot.py", line 446, in show
+    return _get_backend_mod().show(*args, **kwargs)
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python310\lib\site-packages\matplotlib\backend_bases.py", line 3620, in show
+    cls.mainloop()
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python310\lib\site-packages\matplotlib\backends\_backend_tk.py", line 523, in start_main_loop
+    first_manager.window.mainloop()
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python310\lib\tkinter\__init__.py", line 1458, in mainloop
+    self.tk.mainloop(n)
+KeyboardInterrupt
+g\queues.py", line 102, in get
+    with self._rlock:
+  File "C:\Users\franc\AppData\Local\Programs\Python\Python310\lib\multiprocessing\synchronize.py", line 95, in __enter__
+    return self._semlock.__enter__()
+KeyboardInterrupt
+\Users\franc\AppData\Local\Programs\Python\Python310\lib\multiprocessing\connection.py", line 310, in _recv_bytes
+    waitres = _winapi.WaitForMultipleObjects(
+KeyboardInterrupt
