@@ -41,7 +41,8 @@ if __name__ == '__main__':
     path2 = "dataset\\Commercial_MW\Commercial_MW330-500(clean)1.csv"
     path3 = "dataset\\Commercial_MW\Commercial_MW330-500(clean)2.csv"
     path4 = "dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
-    out = "features_distribution_plots\chosen_molecules.csv"
+    out1 = "features_distribution_plots\chosen_molecules.csv"
+    out2 = "features_distribution_plots\\features_max_min.csv"
 
     # List of input smiles strings
     input_smiles = []
@@ -77,12 +78,12 @@ if __name__ == '__main__':
     chosen_smiles = input_smiles[0:num_of_molecules_to_plot]
 
     #create the output file
-    fout = open(out,"w")
+    fout1 = open(out1,"w")
 
     for c in chosen_smiles:
-        fout.write("{}\n".format(c))
+        fout1.write("{}".format(c))
 
-    fout.close()
+    fout1.close()
 
     # Using the model at model_dir path
     with load_model_from_directory(model_dir) as model:
@@ -91,8 +92,6 @@ if __name__ == '__main__':
         # Process latent vector for each input smiles string
         embeddings = model.encode(chosen_smiles)
 
-        # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
-        # adding noise to the embeddings
         num_of_features = len(embeddings[0])
 
         #prepare the x-axis
@@ -107,9 +106,20 @@ if __name__ == '__main__':
         x.insert(0,lower-jump/2)
         x.append(upper+jump/2)
 
+        #plotting the features
+        fout2 = open(out2,"w")
+        fout2.write("feature,max,min\n")
         for i in range(num_of_features):
             y = [0]*len(x)
+            min = embeddings[0][i]
+            max = embeddings[0][i]
             for j in range(num_of_molecules_to_plot):
+                #updating max and min
+                if embeddings[j][i] < min:
+                    min = embeddings[j][i]
+                if embeddings[j][i] > max:
+                    max = embeddings[j][i]
+                #upate data for the plot
                 if embeddings[j][i] < x[0]:
                     y[0] += 1
                 elif embeddings[j][i] >= x[len(x)-1]:
@@ -119,11 +129,16 @@ if __name__ == '__main__':
                     while embeddings[j][i] >= x[k]-jump/2 and k<len(x)-1:
                         k += 1
                     y[k-1] +=1 
+            #update max and min in the file
+            fout2.write("{},{},{}\n".format(i,max,min))
+            #update the plot
             plt.plot(x,y)
             plt.xlabel('feature value')
             plt.ylabel('feature count')
             plt.title("feature n.{}".format(i))
             plt.savefig("features_distribution_plots\\feature{}.png".format(i))
+            plt.clf()
+        fout2.close()
 
     # Empty ERR.txt
     f.truncate()
