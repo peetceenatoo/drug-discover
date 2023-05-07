@@ -25,3 +25,8 @@ https://github.com/numpy/numpy<br>
 
 This code uses now-deprecated functions (from the above-mentioned dependencies) and it is not scheduled yet that we look after it.<br>
 Hope it can be useful somehow, but we suggest that such code be responsibly used.
+
+## Credits
+
+Mattia Piccinato [@peetceenatoo](https://github.com/peetceenatoo)
+Francesco Rita [@FraRita](https://github.com/FraRita)
