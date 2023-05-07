@@ -28,5 +28,5 @@ Hope it can be useful somehow, but we suggest that such code be responsibly used
 
 ## Credits
 
-Mattia Piccinato [@peetceenatoo](https://github.com/peetceenatoo)
+Mattia Piccinato [@peetceenatoo](https://github.com/peetceenatoo)<br>
 Francesco Rita [@FraRita](https://github.com/FraRita)
