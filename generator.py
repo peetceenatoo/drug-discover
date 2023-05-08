@@ -1,4 +1,4 @@
-# --------------------- Hide errors and warnings ---------------------- #
+# --------------------- Solve errors and warnings ---------------------- #
 
 import array
 import os
@@ -23,8 +23,8 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 # ------------------------------- Imports ------------------------------- #
 
 from molecule_generation import load_model_from_directory
-import random
 import numpy as np
+import random
 import time
 
 # ------------------------------ Functions ------------------------------ #
@@ -88,7 +88,11 @@ if __name__ == '__main__':
         num_of_molecules_to_generate = 20
 
         # Process latent vector for each input smiles string
-        embeddings = model.encode(input_smiles)
+        try:
+            embeddings = model.encode(input_smiles)
+        except Exception as e:
+            # Empty ERR.txt
+            f.truncate()
 
         # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
         # adding noise to the embeddings
