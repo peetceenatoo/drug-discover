@@ -34,13 +34,13 @@ import random
 if __name__ == '__main__':
 
     # Specify the directory of the trained model
-    model_dir = "model"
+    model_dir = "..\\..\\model"
 
     # Specify the paths for the database
-    path1 = "..\\dataset\\Commercial_MW\Commercial_MWlower330(clean).csv"
-    path2 = "..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)1.csv"
-    path3 = "..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)2.csv"
-    path4 = "..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
+    path1 = "..\\..\\dataset\\Commercial_MW\Commercial_MWlower330(clean).csv"
+    path2 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)1.csv"
+    path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)2.csv"
+    path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
     out1 = "chosen_molecules.csv"
     out2 = "feat_max_min.csv"
 

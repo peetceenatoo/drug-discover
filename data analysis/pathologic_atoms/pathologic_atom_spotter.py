@@ -34,10 +34,10 @@ import random
 if __name__ == '__main__':
 
     # Specify the directory of the trained model
-    model_dir = "..\\model"
+    model_dir = "..\\..\\model"
 
     # Specify the dataset path
-    path = "..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
+    path = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
     out1 = "chosen_molecules.csv"
 
     # Open the dataset file
