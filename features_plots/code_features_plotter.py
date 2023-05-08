@@ -1,4 +1,4 @@
-# --------------------- Hide errors and warnings ---------------------- #
+# --------------------- Solve errors and warnings ---------------------- #
 
 import array
 import os
@@ -22,10 +22,10 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
 # ------------------------------- Imports ------------------------------- #
 
-from molecule_generation import load_model_from_directory
-import random
-import numpy as np
 import matplotlib.pyplot as plt
+from molecule_generation import load_model_from_directory
+import numpy as np
+import random
 
 # ------------------------------- Code ------------------------------- #
 
@@ -36,90 +36,105 @@ if __name__ == '__main__':
     # Specify the directory of the trained model
     model_dir = "model"
 
-    #specify the paths for the database
-    path1 = "dataset\\Commercial_MW\Commercial_MWlower330(clean).csv"
-    path2 = "dataset\\Commercial_MW\Commercial_MW330-500(clean)1.csv"
-    path3 = "dataset\\Commercial_MW\Commercial_MW330-500(clean)2.csv"
-    path4 = "dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
-    out1 = "features_plots\chosen_molecules.csv"
-    out2 = "features_plots\\features_max_min.csv"
+    # Specify the paths for the database
+    path1 = "..\\dataset\\Commercial_MW\Commercial_MWlower330(clean).csv"
+    path2 = "..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)1.csv"
+    path3 = "..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)2.csv"
+    path4 = "..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
+    out1 = "chosen_molecules.csv"
+    out2 = "feat_max_min.csv"
 
-    # List of input smiles strings
-    input_smiles = []
-
-    #open the files
+    # Open the files
     f1 = open(path1,"r")
     f2 = open(path2,"r")
     f3 = open(path3,"r")
     f4 = open(path4,"r")
 
-    #take all the smiles
+    # List of input smiles strings
+    input_smiles = []
+
+    # Read all the smiles
     for x in f1:
-        input_smiles.append(x)
-
+        input_smiles.append(x.replace("\n",""))
     for x in f2:
-        input_smiles.append(x)
-
+        input_smiles.append(x.replace("\n",""))
     for x in f3:
-        input_smiles.append(x)
-
+        input_smiles.append(x.replace("\n",""))
     for x in f4:
-        input_smiles.append(x)
+        input_smiles.append(x.replace("\n",""))
 
-    #close the files
+    # Close the files
     f1.close()
     f2.close()
     f3.close()
     f4.close()
 
-    #pick random smiles
+    # Pick num_of_molecules_to_plot random smiles
     num_of_molecules_to_plot = 100
     random.shuffle(input_smiles)
     chosen_smiles = input_smiles[0:num_of_molecules_to_plot]
 
-    #create the output file
-    fout1 = open(out1,"w")
+    # Open the output file to store all the num_of_molecules_to_plot smiles
+    fout = open(out1,"w")
 
+    # Write on the output file
     for c in chosen_smiles:
-        fout1.write("{}".format(c))
+        fout.write("{}".format(c))
 
-    fout1.close()
+    # Close the output file
+    fout.close()
 
     # Using the model at model_dir path
     with load_model_from_directory(model_dir) as model:
         print()
 
         # Process latent vector for each input smiles string
-        embeddings = model.encode(chosen_smiles)
+        try:
+            embeddings = model.encode([chosen_smiles[i]])
+        except Exception as e:
+            # Empty ERR.txt
+            f.truncate()
 
         num_of_features = len(embeddings[0])
 
-        #plotting the features
-        fout2 = open(out2,"w")
-        fout2.write("feature,max,min\n")
+        # Write the names of the CSV file columns
+        fout = open(out2,"w")
+        fout.write("feature,max,min\n")
+
+        # For every feature (from 0 to num_of_features-1)
         for i in range(num_of_features):
+
+            # Init x and y
             x = []
             y = []
+            # Init min and max
             min = embeddings[0][i]
             max = embeddings[0][i]
+
+            # For each smiles, eventually save the current smiles (j-th) feature as min or max
             for j in range(num_of_molecules_to_plot):
-                #updating max and min
+                # Update max and min
                 if embeddings[j][i] < min:
                     min = embeddings[j][i]
                 if embeddings[j][i] > max:
                     max = embeddings[j][i]
-                #upate data for the plot
+                # Update data to plot
                 y.append(embeddings[j][i])
                 x.append(j)
-            #update max and min in the file
-            fout2.write("{},{},{}\n".format(i,max,min))
-            #update the plot
+
+            # Write max and min for the current feature (i-th)
+            fout.write("{},{},{}\n".format(i,max,min))
+
+            # Plot
             plt.plot(x,y)
             plt.xlabel('chosen_molecules')
             plt.ylabel('features')
             plt.title("feature n.{}".format(i))
             plt.savefig("features_plots\\feature{}.png".format(i))
             plt.clf()  
-        fout2.close()
+
+        # Close the output file
+        fout.close()
+
     # Empty ERR.txt
     f.truncate()
