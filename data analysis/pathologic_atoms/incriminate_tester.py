@@ -46,22 +46,28 @@ if __name__ == '__main__':
 
     print("Nel dataset ci sono {} molecole e ".format(len(input_smiles)))
 
-    chosen_smiles = []
+    chosen_smiles1 = []
 
     for i in range(len(input_smiles)):
-        if "[B]" in input_smiles[i]:
-            chosen_smiles.append(input_smiles[i])
+        if "[O]" in input_smiles:
+            chosen_smiles1.append(input_smiles[i])
+    
+    chosen_smiles = []
 
-    print("di queste {} contengono \"[B]\" \n".format(len(chosen_smiles)))
-    print("Ora proviamo a vedere se ci sono ancora errori sostituendo \"[B]\" con \"[B-]\" \n")
+    for i in range(len(chosen_smiles1)):
+        if not("N1[O]" in chosen_smiles1[i] or "N([O])" in chosen_smiles1[i]):
+            chosen_smiles.append(chosen_smiles1[i])
+
+    print("di queste {} contengono \"[O]\" \n".format(len(chosen_smiles)))
+    print("Ora proviamo a vedere se ci sono ancora errori sostituendo \"[O]\" con \"[O+]\" \n")
 
     changed_smiles = []
 
     for i in range(len(chosen_smiles)):
-        changed_smiles.append(chosen_smiles[i].replace("[B]","[B-]"))     
+        changed_smiles.append(chosen_smiles[i].replace("[O]","[O+]"))     
 
     for i in range(len(chosen_smiles)):
-        print("{}% ".format(i/len(changed_smiles)*100))
+        #print("{}% ".format(i/len(changed_smiles)*100))
         print(chosen_smiles[i])
         Chem.MolFromSmiles(chosen_smiles[i])
 
