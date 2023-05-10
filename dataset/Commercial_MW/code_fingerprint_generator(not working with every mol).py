@@ -8,7 +8,7 @@ from FPSim2.io import create_db_file
 # due to molecule_generation package usage
 if __name__ == '__main__':
 
-    #specify the paths for the database
+    # Specify the paths for the database
     path1 = "Commercial_MWlower330(clean).csv"
     path2 = "Commercial_MW330-500(clean)1.csv"
     path3 = "Commercial_MW330-500(clean)2.csv"
@@ -24,29 +24,34 @@ if __name__ == '__main__':
     input_smiles3 = []
     input_smiles4 = []
 
-    #open the files
+    # Open the files
     f1 = open(path1,"r")
     f2 = open(path2,"r")
     f3 = open(path3,"r")
     f4 = open(path4,"r")
 
-    #take all the smiles
+    print("Start reading all the smiles...")
+
+    # Read all the smiles from f1
     i=1
     for x in f1:
         input_smiles1.append([x.replace("\n",""),0+i])
         i += 1
 
-    i=2
+    # Read all the smiles from f2
+    i=1
     for x in f2:
         input_smiles2.append([x.replace("\n",""),0+i])
         i += 1
 
-    i=3
+    # Read all the smiles from f3
+    i=1
     for x in f3:
         input_smiles3.append([x.replace("\n",""),0+i])
         i += 1
 
-    i=4
+    # Read all the smiles from f4
+    i=1
     for x in f4:
         input_smiles4.append([x.replace("\n",""),0+i])
         i += 1
@@ -57,7 +62,12 @@ if __name__ == '__main__':
     f3.close()
     f4.close()
 
-    create_db_file(input_smiles1,out1,'Morgan',{'radius': 3,'nBits': 2048})
-    create_db_file(input_smiles2,out2,'Morgan',{'radius': 3,'nBits': 2048})
-    create_db_file(input_smiles3,out3,'Morgan',{'radius': 3,'nBits': 2048})
-    create_db_file(input_smiles4,out4,'Morgan',{'radius': 3,'nBits': 2048})
+    print("Start creating the database... Good luck!")
+
+    try:
+        create_db_file(input_smiles1,out1,'Morgan',{'radius': 3,'nBits': 2048})
+        create_db_file(input_smiles2,out2,'Morgan',{'radius': 3,'nBits': 2048})
+        create_db_file(input_smiles3,out3,'Morgan',{'radius': 3,'nBits': 2048})
+        create_db_file(input_smiles4,out4,'Morgan',{'radius': 3,'nBits': 2048})
+    except Exception as e:
+        pass
