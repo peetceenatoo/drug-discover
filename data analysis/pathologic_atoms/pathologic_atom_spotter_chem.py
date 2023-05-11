@@ -36,10 +36,10 @@ if __name__ == '__main__':
     model_dir = "..\\..\\model"
 
     # Specify the dataset path
-    path1 = "..\\..\\dataset\\Commercial_MW\Commercial_MWlower330(changed).csv"
-    path2 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500(changed)1.csv"
-    path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500(changed)2.csv"
-    path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500(changed).csv"
+    path1 = "..\\..\\dataset\\Commercial_MW\Commercial_MWlower330.csv"
+    path2 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-1.csv"
+    path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-2.csv"
+    path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500.csv"
 
     # Open the files to read
     f1 = open(path1,"r")
@@ -71,18 +71,17 @@ if __name__ == '__main__':
     # New line
     print("Here we go!")
     print()
+    block_size = 5000
     
     # Process latent vector for each input smiles string
     # Embeddings are not actually needed, just seeing if any error is triggered
     for i in range(len(input_smiles)):
-        # Print index to manually observe at what index the error occurs
-        print("{}% -> {} {}".format(round((i+1)/len(input_smiles)*100,2), i+1, input_smiles[i]))
-        # Call to encode()
-        try:
-            Chem.MolFromSmiles(input_smiles[i])
-        except Exception as e:
-            # Empty ERR.txt
-            f.truncate()
+
+        if i%block_size == 0:
+            print("Sono nel blocco che inizia all'indice {}\n".format(i))
+
+        Chem.MolFromSmiles(input_smiles[i])
+
 
     # Empty ERR.txt
     f.truncate()

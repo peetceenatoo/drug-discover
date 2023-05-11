@@ -22,8 +22,8 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
 # ------------------------------- Imports ------------------------------- #
 
-import matplotlib.pyplot as plt
 from molecule_generation import load_model_from_directory
+from rdkit import Chem
 import numpy as np
 import random
 
@@ -37,52 +37,53 @@ if __name__ == '__main__':
     model_dir = "..\\..\\model"
 
     # Specify the dataset path
-    path = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
-    out1 = "chosen_molecules.csv"
+    path1 = "..\\..\\dataset\\Commercial_MW\Commercial_MWlower330.csv"
+    path2 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-1.csv"
+    path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-2.csv"
+    path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500.csv"
 
-    # Open the dataset file
-    f = open(path,"r")
+    # Open the files to read
+    f1 = open(path1,"r")
+    f2 = open(path2,"r")
+    f3 = open(path3,"r")
+    f4 = open(path4,"r")
 
     # List of input smiles strings
     input_smiles = []
 
     # Read all the smiles
-    for x in f:
+    print("Let'start reading from files...")
+
+    for x in f1:
+        input_smiles.append(x.replace("\n",""))
+    for x in f2:
+        input_smiles.append(x.replace("\n",""))
+    for x in f3:
+        input_smiles.append(x.replace("\n",""))
+    for x in f4:
         input_smiles.append(x.replace("\n",""))
 
     # Close the file
-    f.close()
-
-    # Pick num_of_molecules_to_plot random smiles
-    num_of_molecules_to_plot = 100
-    random.shuffle(input_smiles)
-    chosen_smiles = input_smiles[0:num_of_molecules_to_plot]
-
-    # Open the output file to store all the num_of_molecules_to_plot smiles
-    fout = open(out1,"w")
-    # Write the names of the CSV file columns
-    fout.write("Entry,Smiles\n")
-
-    # For each molecule in chosen_smiles, write index (Entry) and Smiles
-    for i in range(num_of_molecules_to_plot):
-        fout.write("{},{}\n".format(i,chosen_smiles[i]))
-
-    # Close the output file
-    fout.close()
-
-    # Using the model at model_dir path
+    f1.close()
+    f2.close()
+    f3.close()
+    f4.close()
+    
     with load_model_from_directory(model_dir) as model:
-        print()
-
+        # New line
+        print("Here we go!")
+        cont = 0
         # Process latent vector for each input smiles string
         # Embeddings are not actually needed, just seeing if any error is triggered
-        for i in range(num_of_molecules_to_plot):
+        for i in range(len(input_smiles)):
             # Print index to manually observe at what index the error occurs
-            print(i)
             # Call to encode()
+            print(i)
             try:
-                embeddings = model.encode([chosen_smiles[i]])
+                a = model.encode([input_smiles[i]])
             except Exception as e:
+                cont += 1
+                print("Previous error (n.{}) was because of: {}".format(cont,input_smiles[i]))
                 # Empty ERR.txt
                 f.truncate()
 
