@@ -71,17 +71,16 @@ if __name__ == '__main__':
     # New line
     print("Here we go!")
     print()
-    lower_bound = 4880000
-    block_size = 5000
-    temp = input_smiles[lower_bound:(lower_bound+block_size)]
     
-    # Process latent vector for each input smiles string
-    # Embeddings are not actually needed, just seeing if any error is triggered
-    for i in range(len(temp)):
+    indexes = [271874,523791,749305,769024,925184,931991,937683,955329,1085792,1112234,1142513,1230280,1233575,1259364,1274479,1436768,1475792,1534117,1772932,1868854,2079008,3304138,4720188,4884396]
 
-        print((lower_bound+i))
-
-        Chem.MolFromSmiles(temp[i])
+    print("N. of indexes : {}".format(len(indexes)))
+    temp = []
+    for i in range(len(indexes)):
+        print(indexes[i])
+        print(input_smiles[indexes[i]])
+        Chem.MolFromSmiles(input_smiles[indexes[i]])
+        print()
 
 
     # Empty ERR.txt
