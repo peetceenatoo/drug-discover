@@ -71,16 +71,17 @@ if __name__ == '__main__':
     # New line
     print("Here we go!")
     print()
+    lower_bound = 4880000
     block_size = 5000
+    temp = input_smiles[lower_bound:(lower_bound+block_size)]
     
     # Process latent vector for each input smiles string
     # Embeddings are not actually needed, just seeing if any error is triggered
-    for i in range(len(input_smiles)):
+    for i in range(len(temp)):
 
-        if i%block_size == 0:
-            print("Sono nel blocco che inizia all'indice {}\n".format(i))
+        print((lower_bound+i))
 
-        Chem.MolFromSmiles(input_smiles[i])
+        Chem.MolFromSmiles(temp[i])
 
 
     # Empty ERR.txt
