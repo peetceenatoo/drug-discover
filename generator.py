@@ -1,5 +1,12 @@
 # --------------------- Solve errors and warnings ---------------------- #
 
+
+#     Currently this script produces a whole wall of errors and warnings
+#     because molecule_generation module uses many deprecated functions.
+#     Although, these all do not affect the correct functioning of
+#     the script and will be fixed by Microsoft team before the deprecated
+#     functions will have been deleted.
+
 import array
 import os
 import sys
@@ -19,6 +26,9 @@ sys.stderr = f
 
 # Set tensorflow logging level to only print fatal errors
 logging.getLogger('tensorflow').setLevel(logging.FATAL) 
+
+# ----------------------------------------------------------------------- #
+
 
 # ------------------------------- Imports ------------------------------- #
 
