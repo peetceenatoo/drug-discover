@@ -1,17 +1,13 @@
 # --------------------- Solve errors and warnings ---------------------- #
 
-
 #     Currently this script produces a whole wall of errors and warnings
 #     because molecule_generation module uses many deprecated functions.
 #     Although, these all do not affect the correct functioning of
 #     the script and will be fixed by Microsoft team before the deprecated
 #     functions will have been deleted.
 
-import array
 import os
-import sys
 import logging
-from contextlib import redirect_stdout
 from tensorflow.python.util import deprecation
 
 # Disable logging output of tensorflow content [May be useless] 
@@ -19,10 +15,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # Do not print deprecation warnings of tensorflow content
 deprecation._PRINT_DEPRECATION_WARNINGS = False
-
-# Set ERR.txt as default error stream
-f = open('ERR.txt', 'w')
-sys.stderr = f
 
 # Set tensorflow logging level to only print fatal errors
 logging.getLogger('tensorflow').setLevel(logging.FATAL) 
@@ -98,28 +90,19 @@ if __name__ == '__main__':
         num_of_molecules_to_generate = 20
 
         # Process latent vector for each input smiles string
-        try:
-            embeddings = model.encode(input_smiles)
-        except Exception as e:
-            # Empty ERR.txt
-            f.truncate()
-
+        embeddings = model.encode(input_smiles)
+        
         # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
         # adding noise to the embeddings
         list_of_embeddings = []
         for i in range(num_of_molecules_to_generate):
             list_of_embeddings.append(addNoise(embeddings[0], 1))
 
-        # Decode without a scaffold constraint.
-        # DO NOT PRINT ANYTHING HERE !!
-        with redirect_stdout(f):
-            list_of_decoded_smiles = model.decode(list_of_embeddings)
+        # Decode without a scaffold constraint
+        list_of_decoded_smiles = model.decode(list_of_embeddings)
 
         # Print all generated smiles
         for i in range(num_of_molecules_to_generate):
             print("Decoded molecule n.{}: ".format(i+1), list_of_decoded_smiles[i],"\n")
         
         print("Have a nice day :)")
-
-    # Empty ERR.txt
-    f.truncate()

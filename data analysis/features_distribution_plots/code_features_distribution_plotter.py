@@ -1,10 +1,7 @@
 # --------------------- Solve errors and warnings ---------------------- #
 
-import array
 import os
-import sys
 import logging
-from contextlib import redirect_stdout
 from tensorflow.python.util import deprecation
 
 # Disable logging output of tensorflow content [May be useless] 
@@ -13,10 +10,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # Do not print deprecation warnings of tensorflow content
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
-# Set ERR.txt as default error stream
-f = open('ERR.txt', 'w')
-sys.stderr = f
-
 # Set tensorflow logging level to only print fatal errors
 logging.getLogger('tensorflow').setLevel(logging.FATAL) 
 
@@ -24,7 +17,6 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
 import matplotlib.pyplot as plt
 from molecule_generation import load_model_from_directory
-import numpy as np
 import random
 
 # ------------------------------- Code ------------------------------- #
@@ -89,12 +81,10 @@ if __name__ == '__main__':
         print()
 
         # Process latent vector for each input smiles string
-        try:
+        for i in range(len(chosen_smiles)):
             embeddings = model.encode([chosen_smiles[i]])
-        except Exception as e:
-            # Empty ERR.txt
-            f.truncate()
 
+        # Set number of embedding features
         num_of_features = len(embeddings[0])
 
         # Init x-axis data
@@ -164,6 +154,3 @@ if __name__ == '__main__':
 
         # Close the output file
         fout.close()
-
-    # Empty ERR.txt
-    f.truncate()

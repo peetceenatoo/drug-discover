@@ -1,10 +1,7 @@
 # --------------------- Solve errors and warnings ---------------------- #
 
-import array
 import os
-import sys
 import logging
-from contextlib import redirect_stdout
 from tensorflow.python.util import deprecation
 
 # Disable logging output of tensorflow content [May be useless] 
@@ -13,19 +10,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # Do not print deprecation warnings of tensorflow content
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
-# Set ERR.txt as default error stream
-f = open('ERR.txt', 'w')
-sys.stderr = f
-
 # Set tensorflow logging level to only print fatal errors
 logging.getLogger('tensorflow').setLevel(logging.FATAL) 
 
 # ------------------------------- Imports ------------------------------- #
 
 from molecule_generation import load_model_from_directory
-from rdkit import Chem
-import numpy as np
-import random
 
 # ------------------------------- Code ------------------------------- #
 
@@ -84,8 +74,3 @@ if __name__ == '__main__':
             except Exception as e:
                 cont += 1
                 print("Previous error (n.{}) was because of: {}".format(cont,input_smiles[i]))
-                # Empty ERR.txt
-                f.truncate()
-
-    # Empty ERR.txt
-    f.truncate()

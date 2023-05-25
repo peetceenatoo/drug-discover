@@ -1,17 +1,13 @@
 # --------------------- Solve errors and warnings ---------------------- #
 
-
 #     Currently this script produces a whole wall of errors and warnings
 #     because molecule_generation module uses many deprecated functions.
 #     Although, these all do not affect the correct functioning of
 #     the script and will be fixed by Microsoft team before the deprecated
 #     functions will have been deleted.
 
-import array
 import os
-import sys
 import logging
-from contextlib import redirect_stdout
 from tensorflow.python.util import deprecation
 
 # Disable logging output of tensorflow content [May be useless] 
@@ -19,10 +15,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # Do not print deprecation warnings of tensorflow content
 deprecation._PRINT_DEPRECATION_WARNINGS = False
-
-# Set ERR.txt as default error stream
-f = open('ERR.txt', 'w')
-sys.stderr = f
 
 # Set tensorflow logging level to only print fatal errors
 logging.getLogger('tensorflow').setLevel(logging.FATAL) 
@@ -35,9 +27,6 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 from molecule_generation import load_model_from_directory
 from FPSim2 import FPSim2Engine
 from FPSim2.io import create_db_file
-from rdkit import Chem
-from rdkit import DataStructs
-from rdkit.Chem import AllChem
 import numpy as np
 import os
 import random
@@ -107,11 +96,7 @@ if __name__ == '__main__':
 
         print("Start encoding...")
         # Process latent vector for each input smiles string
-        try:
-            embeddings = model.encode(input_smiles)
-        except Exception as e:
-            # Empty ERR.txt
-            f.truncate()
+        embeddings = model.encode(input_smiles)
 
         # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
         # adding noise to the embeddings
@@ -120,20 +105,24 @@ if __name__ == '__main__':
         for i in range(num_of_molecules_to_generate):
             list_of_embeddings.append(addNoise(embeddings[0], 1, 0))
 
-        # Decode without a scaffold constraint.
-        # DO NOT PRINT ANYTHING HERE !!
+        # Decode without a scaffold constraint
         print("Start decoding...")
-        with redirect_stdout(f):
-            list_of_decoded_smiles = model.decode(list_of_embeddings)
+        list_of_decoded_smiles = model.decode(list_of_embeddings)
 
     # Create temporary fingerprints.h5
+    # Yeah, there is a function which calculates the fingerprint obviously
+    # but I don't remember its name right now
     print("Creating database with {} molecules...", format(len(list_of_decoded_smiles)))
     create_db_file(list_of_decoded_smiles, out_dir ,'Morgan', {'radius': 3,'nBits': 2048})
 
     # Perform similarity search
+    # Yeah, there is a function which calculates similarity obviously
+    # but I don't remember its name right now
     fpe = FPSim2Engine(out_dir)
     results = fpe.similarity(input_smiles[0], 0, n_workers=4)
 
+    # Yeah, there is a function which calculates the fingerprint obviously
+    # but I don't remember its name right now
     # Delete fingerprints.h5
     if os.path.isfile(out_dir):
         os.remove(out_dir)
@@ -144,6 +133,3 @@ if __name__ == '__main__':
         print("Molecule: {}\nSimilarity: {}\n".format(list_of_decoded_smiles[results[i][0]-1], results[i][1]))
 
     print("Have a nice day :)")
-
-    # Empty ERR.txt
-    f.truncate()
