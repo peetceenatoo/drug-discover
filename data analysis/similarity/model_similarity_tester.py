@@ -47,6 +47,8 @@ if __name__ == '__main__':
     # List of input smiles strings
     input_smiles = []
 
+    print("Opening the files...")
+
     # Open the files
     f1 = open(path1,"r")
     f2 = open(path2,"r")
@@ -71,14 +73,14 @@ if __name__ == '__main__':
     for x in f4:
         input_smiles.append(x.replace("\n",""))
 
-    #close the files
+    # Close the files
     f1.close()
     f2.close()
     f3.close()
     f4.close()
 
-    #taking only num random smiles
-    num = 10
+    # Taking only num random smiles
+    num = 50000
     random.shuffle(input_smiles)
     chosen_smiles_in = input_smiles[0:num]
 
