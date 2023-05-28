@@ -25,8 +25,9 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 # ------------------------------- Imports ------------------------------- #
 
 from molecule_generation import load_model_from_directory
-from FPSim2 import FPSim2Engine
-from FPSim2.io import create_db_file
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
 import numpy as np
 import os
 import random
@@ -80,7 +81,6 @@ if __name__ == '__main__':
 
     # Specify the directory of the trained model
     model_dir = "model"
-    out_dir = "fingerprints"
 
     # List of input smiles strings
     input_smiles = ["CCOc1cc(ccc1OC)c2nnc(SCC(=O)Nc3cccc(Cl)c3)nc2c4ccc(OC)c(OCC)c4"]
@@ -109,27 +109,13 @@ if __name__ == '__main__':
         print("Start decoding...")
         list_of_decoded_smiles = model.decode(list_of_embeddings)
 
-    # Create temporary fingerprints.h5
-    # Yeah, there is a function which calculates the fingerprint obviously
-    # but I don't remember its name right now
-    print("Creating database with {} molecules...", format(len(list_of_decoded_smiles)))
-    create_db_file(list_of_decoded_smiles, out_dir ,'Morgan', {'radius': 3,'nBits': 2048})
+    # Compute fingerprints
+    print("Generating fingerprints...")
+    in_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in input_smiles]
+    out_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in list_of_decoded_smiles]
 
-    # Perform similarity search
-    # Yeah, there is a function which calculates similarity obviously
-    # but I don't remember its name right now
-    fpe = FPSim2Engine(out_dir)
-    results = fpe.similarity(input_smiles[0], 0, n_workers=4)
-
-    # Yeah, there is a function which calculates the fingerprint obviously
-    # but I don't remember its name right now
-    # Delete fingerprints.h5
-    if os.path.isfile(out_dir):
-        os.remove(out_dir)
-
-    # Print molecules with their similarity to the input one
-    print()
-    for i in range(len(results)):
-        print("Molecule: {}\nSimilarity: {}\n".format(list_of_decoded_smiles[results[i][0]-1], results[i][1]))
+    # Calculate similarity
+    for i in range(len(list_of_decoded_smiles)):
+        print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smiles[0], list_of_decoded_smiles[i], DataStructs.TanimotoSimilarity(in_fps[0], out_fps[i])))
 
     print("Have a nice day :)")
