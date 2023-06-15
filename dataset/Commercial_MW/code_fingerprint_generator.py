@@ -51,4 +51,4 @@ f4.close()
 
 print("Start creating the database... Good luck!")
 
-create_db_file(input_smiles,out1,'Morgan',{'radius': 3,'nBits': 2048})
+create_db_file(input_smiles, out1, 'RDKit')
