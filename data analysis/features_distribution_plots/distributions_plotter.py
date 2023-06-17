@@ -98,46 +98,47 @@ if __name__ == '__main__':
         magnitude += 1
         factor = factor * 10
 
-    # Open the output file to store all the num_of_chosen_molecules smiles
+    # Open the output file
     fout = open(out1,"w")
     fout.write("{}\n".format(interval))
 
-    for i in range(num_of_features):
+    # For each feature
+    for j in range(num_of_features):
 
         # Init x-axis data
-        lower = round(min[i] - min[i]%interval + interval/2, magnitude)
-        upper = round(max[i] - max[i]%interval + interval/2, magnitude)
+        lower = round(min[j] - min[j]%interval + interval/2, magnitude)
+        upper = round(max[j] - max[j]%interval + interval/2, magnitude)
         fout.write("{}:".format(lower - interval/2))
 
         # Define x-axis
         x = list( range( (int)(lower*factor), (int)(upper*factor+1), (int)(interval*factor) ) )
-        for i in range(len(x)):
-            x[i] = x[i]/factor
+        for k in range(len(x)):
+            x[k] = x[k]/factor
 
         # Init y-axis as list of len(x) elements
         y = [0]*len(x)
 
-        for j in range(num_of_chosen_molecules):
+        for i in range(num_of_chosen_molecules):
 
             # Calculate the value on the y-axis
             k=0
-            while k<len(y) and embeddings[j][i] >= x[k]-interval/2:
+            while k<len(y) and embeddings[i][j] >= x[k]-interval/2:
                 k += 1
             y[k-1] += 1 
 
         # Set the data in percentage
-        for j in range(len(y)):
-            y[j] = y[j]/num_of_chosen_molecules
-            fout.write("{};".format(y[j]))
-            y[j] = y[j]*100
+        for k in range(len(y)):
+            y[k] = y[k]/num_of_chosen_molecules
+            fout.write("{};".format(y[k]))
+            y[k] = y[k]*100
         fout.write("\n")
         
         # Plot
         plt.plot(x,y)
         plt.xlabel('feature values')
         plt.ylabel('feature counts in percentage')
-        plt.title("feature n.{}".format(i+1))
-        plt.savefig("feature{}.png".format(i+1))
+        plt.title("feature n.{}".format(j+1))
+        plt.savefig("feature{}.png".format(j+1))
         plt.clf()
     
     fout.close()
