@@ -35,10 +35,10 @@ if __name__ == '__main__':
     model_dir = "..\\..\\model"
 
     # Specify the paths for the database
-    path1 = "..\\..\\dataset\\Commercial_MW\Commercial_MWlower330(clean).csv"
-    path2 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)1.csv"
-    path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500(clean)2.csv"
-    path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500(clean).csv"
+    path1 = "..\\..\\dataset\\Commercial_MW\Commercial_MWlower330.csv"
+    path2 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-1.csv"
+    path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-2.csv"
+    path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500.csv"
     out1 = "features_distributions.txt"
 
     # Open the files
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     magnitude = 0
     factor = 1
     while interval*factor < 10 :
-        magnitude +=1
+        magnitude += 1
         factor = factor * 10
 
     # Open the output file to store all the num_of_chosen_molecules smiles
@@ -105,8 +105,8 @@ if __name__ == '__main__':
     for i in range(num_of_features):
 
         # Init x-axis data
-        lower = round(magnitude, min[i] - min[i]%interval + interval/2)
-        upper = round(magnitude, max[i] - max[i]%interval + interval/2)
+        lower = round(min[i] - min[i]%interval + interval/2, magnitude)
+        upper = round(max[i] - max[i]%interval + interval/2, magnitude)
         fout.write("{}:".format(lower - interval/2))
 
         # Define x-axis
@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
             # Calculate the value on the y-axis
             k=0
-            while embeddings[j][i] >= x[k]-interval/2 and k<len(x):
+            while k<len(y) and embeddings[j][i] >= x[k]-interval/2:
                 k += 1
             y[k-1] += 1 
 
@@ -129,6 +129,7 @@ if __name__ == '__main__':
         for j in range(len(y)):
             y[j] = y[j]/num_of_chosen_molecules
             fout.write("{};".format(y[j]))
+            y[j] = y[j]*100
         fout.write("\n")
         
         # Plot
