@@ -25,11 +25,15 @@ logging.getLogger('tensorflow').setLevel(logging.FATAL)
 # ------------------------------- Imports ------------------------------- #
 
 from molecule_generation import load_model_from_directory
+from rdkit import Chem
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
 import numpy as np
+import os
 import random
 import time
 
-# ------------------------------ Functions ------------------------------ #
+# ------------------------------ addNoise ------------------------------- #
 
 def addNoise(embedding, scale=1, num=None):
 
@@ -79,7 +83,8 @@ if __name__ == '__main__':
     model_dir = "model"
 
     # List of input smiles strings
-    input_smiles = ["CCC(C)NC(=O)COc1cccc(C)c1"]
+    input_smiles = ["CCOc1cc(ccc1OC)c2nnc(SCC(=O)Nc3cccc(Cl)c3)nc2c4ccc(OC)c(OCC)c4"]
+
     print(f"Encoded: {input_smiles}","\n")
 
     # Using the model at model_dir path
@@ -87,22 +92,30 @@ if __name__ == '__main__':
         print()
 
         # Number of molecules to be generated from each input smiles string
-        num_of_molecules_to_generate = 20
+        num_of_molecules_to_generate = 1
 
+        print("Start encoding...")
         # Process latent vector for each input smiles string
         embeddings = model.encode(input_smiles)
-        
+
         # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
         # adding noise to the embeddings
         list_of_embeddings = []
+        print("Start adding noise...")
         for i in range(num_of_molecules_to_generate):
-            list_of_embeddings.append(addNoise(embeddings[0], 1))
+            list_of_embeddings.append(addNoise(embeddings[0], 1, 0))
 
         # Decode without a scaffold constraint
+        print("Start decoding...")
         list_of_decoded_smiles = model.decode(list_of_embeddings)
 
-        # Print all generated smiles
-        for i in range(num_of_molecules_to_generate):
-            print("Decoded molecule n.{}: ".format(i+1), list_of_decoded_smiles[i],"\n")
-        
-        print("Have a nice day :)")
+    # Compute fingerprints
+    print("Generating fingerprints...")
+    in_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in input_smiles]
+    out_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in list_of_decoded_smiles]
+
+    # Calculate similarity
+    for i in range(len(list_of_decoded_smiles)):
+        print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smiles[0], list_of_decoded_smiles[i], DataStructs.TanimotoSimilarity(in_fps[0], out_fps[i])))
+
+    print("Have a nice day :)")
