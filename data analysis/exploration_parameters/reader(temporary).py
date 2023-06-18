@@ -11,31 +11,34 @@ path = "..\\features_distribution_plots\\features_distributions.txt"
 f = open(path,"r")
 
 # Read the size of the discretization range
-range = float(f.readline().strip())
+interval_size = float(f.readline().strip())
+magnitude = 0
+while interval_size*(10**magnitude) < 1:
+    magnitude+=1
 
 # Read the ranges for each feature and put them in the rows map
-rows_map = {}
+rows_list = []
 for row in f:
         # Remove leading/trailing whitespace and newline characters
         row = row.strip()
         
         # Split the row by colon
         parts = row.split(":")
-        bottom = parts[0]
+        bottom = float(parts[0])
         probs_part = parts[1]
         
         # Split the second part by semicolon
-        probs = probs.split(";")
+        probs = probs_part.split(";")
+        probs = probs[:len(probs)-1]
 
         # Compute the map of probabilities for the current row
         temp_map = {}
-        cont = 0
-        for d in probs:
-            temp_map[bottom+cont*range] = float(d)
-            cont = cont+1
+        for i in range(len(probs)):
+            temp_map[round(bottom+i*interval_size,magnitude)] = float(probs[i])
             
         # Put current map of probabilities in the rows map
-        rows_map[len(rows_map)] = temp_map
+        rows_list.append(temp_map)
             
 # Close the file
 f.close()
+
