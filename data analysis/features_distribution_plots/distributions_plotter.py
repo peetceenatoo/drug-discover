@@ -4,14 +4,14 @@ import os
 import logging
 from tensorflow.python.util import deprecation
 
-# Disable logging output of tensorflow content [May be useless] 
+# Disable logging output of tensorflow content [May be useless]
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # Do not print deprecation warnings of tensorflow content
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
 # Set tensorflow logging level to only print fatal errors
-logging.getLogger('tensorflow').setLevel(logging.FATAL) 
+logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
 # ------------------------------- Imports ------------------------------- #
 
@@ -27,7 +27,15 @@ import copy
 if __name__ == '__main__':
 
     # Define the number of molecule to analyse
+<<<<<<< Updated upstream
     num_of_chosen_molecules = 100
+=======
+<<<<<<< HEAD
+    num_of_chosen_molecules = 10000
+=======
+    num_of_chosen_molecules = 100
+>>>>>>> 0d4704de37a845e7a271a1e4e3c05a08a80d77a5
+>>>>>>> Stashed changes
     # Define the interval length
     interval = 0.02
 
@@ -58,7 +66,7 @@ if __name__ == '__main__':
     for x in f3:
         input_smiles.append(x.replace("\n",""))
     for x in f4:
-        input_smiles.append(x.replace("\n",""))    
+        input_smiles.append(x.replace("\n",""))
 
     # Close the files
     f1.close()
@@ -124,7 +132,7 @@ if __name__ == '__main__':
             k=0
             while k<len(y) and embeddings[i][j] >= x[k]-interval/2:
                 k += 1
-            y[k-1] += 1 
+            y[k-1] += 1
 
         # Set the data in percentage
         for k in range(len(y)):
@@ -132,7 +140,7 @@ if __name__ == '__main__':
             fout.write("{};".format(y[k]))
             y[k] = y[k]*100
         fout.write("\n")
-        
+
         # Plot
         plt.plot(x,y)
         plt.xlabel('feature values')
@@ -140,5 +148,5 @@ if __name__ == '__main__':
         plt.title("feature n.{}".format(j+1))
         plt.savefig("feature{}.png".format(j+1))
         plt.clf()
-    
+
     fout.close()
