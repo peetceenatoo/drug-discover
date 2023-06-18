@@ -14,7 +14,7 @@ f = open(path,"r")
 range = float(f.readline().strip())
 
 # Read the ranges for each feature and put them in the rows map
-rows_map = {}
+features_list = []
 for row in f:
         # Remove leading/trailing whitespace and newline characters
         row = row.strip()
@@ -25,17 +25,15 @@ for row in f:
         probs_part = parts[1]
         
         # Split the second part by semicolon
-        probs = probs.split(";")
+        probs = probs_part.split(";")
 
         # Compute the map of probabilities for the current row
         temp_map = {}
-        cont = 0
-        for d in probs:
-            temp_map[bottom+cont*range] = float(d)
-            cont = cont+1
+        for i in range(len(probs)):
+            temp_map[bottom+i*range] = float(probs[i])
             
         # Put current map of probabilities in the rows map
-        rows_map[len(rows_map)] = temp_map
+        features_list.append(temp_map)
             
 # Close the file
 f.close()
