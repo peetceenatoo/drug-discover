@@ -6,6 +6,7 @@
 #     the script and will be fixed by Microsoft team before the deprecated
 #     functions will have been deleted.
 
+from math import sqrt
 import os
 import logging
 from tensorflow.python.util import deprecation
@@ -39,59 +40,109 @@ import copy
 # Compute module of the magnitude of the size of the intervals
 interval_size = 0
 magnitude = 0
+distributions = []
 
 # ------------------------------ addNoise ------------------------------- #
 
-def addNoise(distributions, area, embedding, num=None):
+def addNoise(embedding, area, num_of_molecules, num=None):
 
     # If the number of elements to add disturb to is not explicitly defined,
     # then add noise to the whole embedding
     if num == None:
         num = len(embedding)
 
-    # Calculate the indexes of the num elements to be modified
-    all_indexes = [i for i in range(len(embedding))]
-    random.shuffle(all_indexes)
-    indexes_to_be_modified = all_indexes[0:num]
+    global interval_size
+    global magnitude
+    global distributions
 
-    # Initialize embedding to be returned
-    modified_embedding = copy.deepcopy(embedding)
+    # For each feature calculates its range for noise
+    noise_intervals_lengths = []
+    for i in range(len(distributions)):
+        current_feature_distribution = distributions[i]
+        current_interval = round(embedding[i] - embedding[i]%interval_size,magnitude)
+        
+        # Fetures in distribution tails are not touched
+        intervals = sorted(current_feature_distribution.keys())
+        left_tail = 0
+        count = 0
+        for j in range(len(intervals)):
+            if count < area/2:
+                count += current_feature_distribution[intervals[j]]
+            else:
+                left_tail = intervals[j]
+                break
+        right_tail = 0
+        count = 0
+        for j in range(len(intervals)):
+            if count < area/2:
+                count += current_feature_distribution[intervals[len(intervals)-1-j]]
+            else:
+                right_tail = intervals[j]
+                break
+        if current_interval < left_tail or current_interval > right_tail:
+            noise_intervals_lengths.append(0.0)
+            continue
 
+        # Find the interval in which noise must be added
+        if embedding[i]%interval_size < interval_size-embedding[i]%interval_size:
+            even = embedding[i]%interval_size
+            odd = interval_size-embedding[i]%interval_size
+            is_near_lower = True
+        else:
+            even = interval_size-embedding[i]%interval_size
+            odd = embedding[i]%interval_size
+            is_near_lower = False
+
+        lower_bound = embedding[i]
+        upper_bound = embedding[i]
+        current_area = 0
+        j = 0
+        while True:
+            if j%2 == 0:
+                p_lower = current_feature_distribution[round(current_interval-interval_size*j/2,magnitude)]
+                p_upper = current_feature_distribution[round(current_interval+interval_size*j/2,magnitude)]
+                if current_area + even/interval_size*(p_lower + p_upper) >= area:
+                    break
+                lower_bound -= even
+                upper_bound += even
+                current_area += even/interval_size*(p_lower + p_upper)
+            else:
+                if is_near_lower:
+                    p_lower = current_feature_distribution[round(current_interval-interval_size*(1+(j-j%2)/2),magnitude)]
+                    p_upper = current_feature_distribution[round(current_interval+interval_size*(j-j%2)/2,magnitude)]
+                else:
+                    p_lower = current_feature_distribution[round(current_interval-interval_size*(j-j%2)/2,magnitude)]
+                    p_upper = current_feature_distribution[round(current_interval+interval_size*(1+(j-j%2)/2),magnitude)]
+                if current_area + odd/interval_size*(p_lower + p_upper) >= area:
+                    break
+                lower_bound -= odd
+                upper_bound += odd
+                current_area += odd/interval_size*(p_lower + p_upper)
+            j += 1
+        
+        r = sqrt((area-current_area)*interval_size/(p_lower+p_upper))
+        noise_intervals_lengths.append(upper_bound-lower_bound+2*r)
+        
+    modified_embeddings = []
+    all_indexes = [j for j in range(len(embedding))]
     # Set the seed for the np.random.normal(...) function
     np.random.seed(int(time.time()))
+    for i in range(num_of_molecules):
 
-    # For each index previously calculated
-    for i in range(len(indexes_to_be_modified)):
-        current_feature = indexes_to_be_modified[i]
-        current_feature_distribution = distributions[current_feature]
-        current_interval = round(embedding[current_feature] - embedding[current_feature]%interval_size,magnitude)
-        intervals = sorted(current_feature_distribution.keys())
-        
-        if current_interval < intervals[0] or current_interval > intervals[len(intervals)-1]:
-            continue
-        left_tail = 0
-        right_tail = 0
-        for j in range(len(intervals)):
-            if left_tail < area/2:
-                left_tail += intervals[j]
-            if right_tail < 1 - area/2:
-                right_tail += intervals[j]
-        if current_interval < left_tail or current_interval > right_tail:
-            continue
+        # Calculate the indexes of the num elements to be modified
+        random.shuffle(all_indexes)
+        indexes_to_be_modified = all_indexes[0:num]
 
-        base = 0
-        if current_interval
-        # Add noise to such element
-        modified_embedding[indexes_to_be_modified[i]] += np.random.normal(0, scale/magnitude)
+        # Initialize embedding to be returned
+        modified_embedding = copy.deepcopy(embedding)
 
-        # --- About how to choose the scale for np.random.normal(...) function --- 
-        #   Using num = len(embedding): we noticed that much lower values than scale/magnitude
-        #                               are likely to provide many duplicates. On the other hand,
-        #                               much bigger values than scale/magnitude are likely to
-        #                               provide molecules which are too different from the input.
+        for j in range(num):
+            current_range = noise_intervals_lengths[indexes_to_be_modified[j]]
+            modified_embedding[indexes_to_be_modified[j]] += random.random()*current_range-current_range/2
+        modified_embeddings.append(modified_embedding)
 
-    # Return the embedding with noise addition
-    return modified_embedding
+    # Return the embeddings with noise addition
+    return modified_embeddings
 
 # ------------------------------ readDistributions ------------------------------- #
 
@@ -103,12 +154,14 @@ def readDistributions():
     f = open(path,"r")
 
     # Read the size of the discretization range
+    global interval_size
+    global magnitude
+    global distributions
     interval_size = float(f.readline().strip())
     while interval_size*(10**magnitude) < 1:
-        magnitude+=1
+        magnitude += 1
 
     # Read the ranges for each feature and put them in the rows map
-    rows_list = []
     for row in f:
             # Remove leading/trailing whitespace and newline characters
             row = row.strip()
@@ -128,13 +181,11 @@ def readDistributions():
                 temp_map[round(bottom+i*interval_size,magnitude)] = float(probs[i])
                 
             # Put current map of probabilities in the rows map
-            rows_list.append(temp_map)
+            distributions.append(temp_map)
                 
     # Close the file
     f.close()
-
-    # Return the list
-    return rows_list, interval_size
+    return
 
 
 # ------------------------------- Code ------------------------------- #
@@ -150,18 +201,16 @@ if __name__ == '__main__':
     model_dir = "..\\..\\model"
 
     # List of input smiles strings
-    input_smiles = ["CCOc1cc(ccc1OC)c2nnc(SCC(=O)Nc3cccc(Cl)c3)nc2c4ccc(OC)c(OCC)c4"]
+    input_smiles = ["COc1ccc(OS(=O)(=O)C(F)(F)F)c(Br)c1"]
 
     print(f"Encoded: {input_smiles}","\n")
-
-    features_distributions, interval_size = readDistributions()
 
     # Using the model at model_dir path
     with load_model_from_directory(model_dir) as model:
         print()
 
         # Number of molecules to be generated from each input smiles string
-        num_of_molecules_to_generate = 1
+        num_of_molecules_to_generate = 10
 
         print("Start encoding...")
         # Process latent vector for each input smiles string
@@ -171,8 +220,7 @@ if __name__ == '__main__':
         # adding noise to the embeddings
         list_of_embeddings = []
         print("Start adding noise...")
-        for i in range(num_of_molecules_to_generate):
-            list_of_embeddings.append(addNoise(???))
+        list_of_embeddings = addNoise(embeddings[0],0.2,num_of_molecules_to_generate)
 
         # Decode without a scaffold constraint
         print("Start decoding...")
