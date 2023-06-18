@@ -27,15 +27,7 @@ import copy
 if __name__ == '__main__':
 
     # Define the number of molecule to analyse
-<<<<<<< Updated upstream
-    num_of_chosen_molecules = 100
-=======
-<<<<<<< HEAD
     num_of_chosen_molecules = 10000
-=======
-    num_of_chosen_molecules = 100
->>>>>>> 0d4704de37a845e7a271a1e4e3c05a08a80d77a5
->>>>>>> Stashed changes
     # Define the interval length
     interval = 0.02
 
@@ -116,7 +108,7 @@ if __name__ == '__main__':
         # Init x-axis data
         lower = round(min[j] - min[j]%interval + interval/2, magnitude)
         upper = round(max[j] - max[j]%interval + interval/2, magnitude)
-        fout.write("{}:".format(lower - interval/2))
+        fout.write("{}:".format(round(lower - interval/2,magnitude)))
 
         # Define x-axis
         x = list( range( (int)(lower*factor), (int)(upper*factor+1), (int)(interval*factor) ) )
