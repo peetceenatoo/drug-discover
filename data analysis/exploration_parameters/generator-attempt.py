@@ -244,23 +244,22 @@ if __name__ == '__main__':
     with load_model_from_directory(model_dir) as model:
         print()
 
-        # Number of molecules to be generated from each input smiles string
-        num_of_molecules_to_generate = 20
         # Starting value for the area
-        area = 0.01
+        area = 0.0
         # Weights for finding/not finding duplicates
-        present = 0.01
+        present = 0.005
         not_present = -0.05
 
         print("Start encoding...")
         # Process latent vector for each input smiles string
         embedding = (model.encode([input_smile]))[0]
 
-        # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
+        # Calculate molecules for each input smiles string,
         # adding noise to the embeddings
         list_of_decoded_smiles = []
         print("Start adding noise...")
-        while len(list_of_decoded_smiles) < num_of_molecules_to_generate and area < 0.5:
+        while area < 0.5:
+            area = max(area,0.0)
             modified_molecule = (model.decode([addNoise(embedding,area)]))[0]
             if modified_molecule in list_of_decoded_smiles:
                 area += present
