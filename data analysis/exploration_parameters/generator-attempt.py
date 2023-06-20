@@ -172,48 +172,24 @@ def readDistributions():
 # ------------------------------ readDataset ------------------------------- #
 
 def readDataset():
-    path1 = "..\\..\\dataset\\Commercial_MW\\Commercial_MWlower330.csv"
-    path2 = "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-1.csv"
-    path3 = "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-2.csv"
-    path4 = "..\\..\\dataset\\Commercial_MW\\Commercial_MWhigher500.csv"
+
+    dataset_paths = ["..\\..\\dataset\\Commercial_MW\\Commercial_MWlower330.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-1.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-2.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MWhigher500.csv"]
 
     # List of input smiles strings
     dataset_smiles = []
 
-    # Open the files
-    f1 = open(path1,"r")
-    f2 = open(path2,"r")
-    f3 = open(path3,"r")
-    f4 = open(path4,"r")
+    for path in dataset_paths:
 
-    print("Start reading all the smiles...")
+        # Open the files
+        f = open(path,"r")
 
-    # Read all the smiles from f1
-    i=0
-    for x in f1:
-        dataset_smiles.append(x.replace("\n",""))
-        i += 1
+        # Read all the smiles from f
+        for x in f:
+            dataset_smiles.append(x.replace("\n",""))
+            
+        #close the files
+        f.close()
 
-    # Read all the smiles from f2
-    for x in f2:
-        dataset_smiles.append(x.replace("\n",""))
-        i += 1
-
-    # Read all the smiles from f3
-    for x in f3:
-        dataset_smiles.append(x.replace("\n",""))
-        i += 1
-
-    # Read all the smiles from f4
-    for x in f4:
-        dataset_smiles.append(x.replace("\n",""))
-        i += 1
-
-    #close the files
-    f1.close()
-    f2.close()
-    f3.close()
-    f4.close()
     return dataset_smiles
 
 # ------------------------------- Code ------------------------------- #
@@ -272,7 +248,6 @@ if __name__ == '__main__':
 
     # Similarity search
     similarity_dataset = 0.5
-    num_of_similar_smiles_per_decoded_smiles = 5
     output_smiles = []
     fpe = FPSim2Engine(fp_filename)
     for decoded_smile in list_of_decoded_smiles:
@@ -281,8 +256,6 @@ if __name__ == '__main__':
         for res in results:
             if all(dataset_smiles[res[0]-1] != out_smi[0] for out_smi in output_smiles) and dataset_smiles[res[0]-1] != input_smile:
                 results_smiles.append(dataset_smiles[res[0]-1])
-                if len(results_smiles) >= num_of_similar_smiles_per_decoded_smiles:
-                    break
         if len(results_smiles) == 0:
             continue
         res_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(res_smi)) for res_smi in results_smiles]
