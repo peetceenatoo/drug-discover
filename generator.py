@@ -28,50 +28,169 @@ from molecule_generation import load_model_from_directory
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
-import numpy as np
+from FPSim2 import FPSim2Engine
 import os
 import random
-import time
+import copy
+
+# ------------------------------ Global ------------------------------- #
+
+# Compute module of the magnitude of the size of the intervals
+interval_size = 0
+magnitude = 0
+distributions = []
 
 # ------------------------------ addNoise ------------------------------- #
 
-def addNoise(embedding, scale=1, num=None):
+def addNoise(embedding, area):
 
-    # If the number of elements to add disturb to is not explicitly defined,
-    # then add noise to the whole embedding
-    if num == None:
-        num = len(embedding)
+    global interval_size
+    global magnitude
+    global distributions
 
-    # Calculate the indexes of the num elements to be modified
-    all_indexes = [i for i in range(len(embedding))]
-    random.shuffle(all_indexes)
-    indexes_to_be_modified = all_indexes[0:num]
+    # For each feature calculates its range for noise
+    noise_intervals_lengths = []
+    for i in range(len(distributions)):
+        current_feature_distribution = distributions[i]
+        current_interval = round(embedding[i] - embedding[i]%interval_size,magnitude)
+        
+        # Fetures in distribution tails are not touched
+        intervals = sorted(current_feature_distribution.keys())
+        left_tail = 0
+        count = 0
+        for j in range(len(intervals)):
+            if count < area/2:
+                count += current_feature_distribution[intervals[j]]
+            else:
+                left_tail = intervals[j]
+                break
+        right_tail = 0
+        count = 0
+        for j in range(len(intervals)):
+            if count < area/2:
+                count += current_feature_distribution[intervals[len(intervals)-1-j]]
+            else:
+                right_tail = intervals[j]
+                break
+        if current_interval < left_tail or current_interval > right_tail:
+            noise_intervals_lengths.append(0.0)
+            continue
+
+        # Find the interval in which noise must be added
+        if embedding[i]%interval_size < interval_size-embedding[i]%interval_size:
+            even = embedding[i]%interval_size
+            odd = interval_size-embedding[i]%interval_size
+            is_near_lower = True
+        else:
+            even = interval_size-embedding[i]%interval_size
+            odd = embedding[i]%interval_size
+            is_near_lower = False
+
+        lower_bound = embedding[i]
+        upper_bound = embedding[i]
+        current_area = 0
+        j = 0
+        while True:
+            if j%2 == 0:
+                p_lower = current_feature_distribution[round(current_interval-interval_size*j/2,magnitude)]
+                p_upper = current_feature_distribution[round(current_interval+interval_size*j/2,magnitude)]
+                if current_area + even/interval_size*(p_lower + p_upper) >= area:
+                    break
+                lower_bound -= even
+                upper_bound += even
+                current_area += even/interval_size*(p_lower + p_upper)
+            else:
+                if is_near_lower:
+                    p_lower = current_feature_distribution[round(current_interval-interval_size*(1+(j-j%2)/2),magnitude)]
+                    p_upper = current_feature_distribution[round(current_interval+interval_size*(j-j%2)/2,magnitude)]
+                else:
+                    p_lower = current_feature_distribution[round(current_interval-interval_size*(j-j%2)/2,magnitude)]
+                    p_upper = current_feature_distribution[round(current_interval+interval_size*(1+(j-j%2)/2),magnitude)]
+                if current_area + odd/interval_size*(p_lower + p_upper) >= area:
+                    break
+                lower_bound -= odd
+                upper_bound += odd
+                current_area += odd/interval_size*(p_lower + p_upper)
+            j += 1
+        
+        r = (area-current_area)*interval_size/(p_lower+p_upper)
+        noise_intervals_lengths.append(upper_bound-lower_bound+2*r)
 
     # Initialize embedding to be returned
-    modified_embedding = embedding.copy()
+    modified_embedding = copy.deepcopy(embedding)
 
-    # Set the seed for the np.random.normal(...) function
-    np.random.seed(int(time.time()))
-
-    # For each index previously calculated
-    for i in range(len(indexes_to_be_modified)):
-
-        # Calculate the magnitude of the element at i-th index
-        magnitude = 1.0
-        while abs(modified_embedding[indexes_to_be_modified[i]]*magnitude)<1.0 :
-            magnitude = magnitude*10
-
-        # Add noise to such element
-        modified_embedding[indexes_to_be_modified[i]] += np.random.normal(0, scale/magnitude)
-
-        # --- About how to choose the scale for np.random.normal(...) function --- 
-        #   Using num = len(embedding): we noticed that much lower values than scale/magnitude
-        #                               are likely to provide many duplicates. On the other hand,
-        #                               much bigger values than scale/magnitude are likely to
-        #                               provide molecules which are too different from the input.
+    for j in range(len(embedding)):
+        current_range = noise_intervals_lengths[j]
+        modified_embedding[j] += random.random()*current_range-current_range/2
 
     # Return the embedding with noise addition
     return modified_embedding
+
+# ------------------------------ readDistributions ------------------------------- #
+
+def readDistributions():
+    # Specify the paths for the database
+    path = "..\\features_distribution_plots\\features_distributions.txt"
+
+    # Open the file
+    f = open(path,"r")
+
+    # Read the size of the discretization range
+    global interval_size
+    global magnitude
+    global distributions
+    interval_size = float(f.readline().strip())
+    while interval_size*(10**magnitude) < 1:
+        magnitude += 1
+
+    # Read the ranges for each feature and put them in the rows map
+    for row in f:
+            # Remove leading/trailing whitespace and newline characters
+            row = row.strip()
+            
+            # Split the row by colon
+            parts = row.split(":")
+            bottom = float(parts[0])
+            probs_part = parts[1]
+            
+            # Split the second part by semicolon
+            probs = probs_part.split(";")
+            probs = probs[:len(probs)-1]
+
+            # Compute the map of probabilities for the current row
+            temp_map = {}
+            for i in range(len(probs)):
+                temp_map[round(bottom+i*interval_size,magnitude)] = float(probs[i])
+                
+            # Put current map of probabilities in the rows map
+            distributions.append(temp_map)
+                
+    # Close the file
+    f.close()
+    return
+
+# ------------------------------ readDataset ------------------------------- #
+
+def readDataset():
+
+    dataset_paths = ["..\\..\\dataset\\Commercial_MW\\Commercial_MWlower330.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-1.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-2.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MWhigher500.csv"]
+
+    # List of input smiles strings
+    dataset_smiles = []
+
+    for path in dataset_paths:
+
+        # Open the files
+        f = open(path,"r")
+
+        # Read all the smiles from f
+        for x in f:
+            dataset_smiles.append(x.replace("\n",""))
+            
+        #close the files
+        f.close()
+
+    return dataset_smiles
 
 # ------------------------------- Code ------------------------------- #
 
@@ -79,43 +198,71 @@ def addNoise(embedding, scale=1, num=None):
 # due to molecule_generation package usage
 if __name__ == '__main__':
 
+    # Read from distributions file
+    readDistributions()
+
+    # Read from dataset
+    dataset_smiles = readDataset()
+
     # Specify the directory of the trained model
-    model_dir = "model"
+    model_dir = "..\\..\\model"
 
-    # List of input smiles strings
-    input_smiles = ["CCOc1cc(ccc1OC)c2nnc(SCC(=O)Nc3cccc(Cl)c3)nc2c4ccc(OC)c(OCC)c4"]
+    # Specify the path for the file containing dataset fingerprints
+    fp_filename = '..\\..\\dataset\\Commercial_MW\\fingerprints.h5'
 
-    print(f"Encoded: {input_smiles}","\n")
+    # Input smile
+    input_smile = "COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4"
+    in_fps = AllChem.RDKFingerprint(Chem.MolFromSmiles(input_smile)) 
+
+    print(f"Encoded: ",input_smile,"\n")
 
     # Using the model at model_dir path
     with load_model_from_directory(model_dir) as model:
         print()
 
-        # Number of molecules to be generated from each input smiles string
-        num_of_molecules_to_generate = 1
+        # Starting value for the area
+        area = 0.0
+        # Weights for finding/not finding duplicates
+        present = 0.005
+        not_present = -0.05
 
         print("Start encoding...")
         # Process latent vector for each input smiles string
-        embeddings = model.encode(input_smiles)
+        embedding = (model.encode([input_smile]))[0]
 
-        # Calculate num_of_molecules_to_generate diverse molecules for each input smiles string,
+        # Calculate molecules for each input smiles string,
         # adding noise to the embeddings
-        list_of_embeddings = []
+        list_of_decoded_smiles = []
         print("Start adding noise...")
-        for i in range(num_of_molecules_to_generate):
-            list_of_embeddings.append(addNoise(embeddings[0], 1, 0))
+        while area < 0.5:
+            area = max(area,0.0)
+            modified_molecule = (model.decode([addNoise(embedding,area)]))[0]
+            if modified_molecule in list_of_decoded_smiles:
+                area += present
+            else:
+                list_of_decoded_smiles.append(modified_molecule)
+                area += not_present
 
-        # Decode without a scaffold constraint
-        print("Start decoding...")
-        list_of_decoded_smiles = model.decode(list_of_embeddings)
+    # The first element is always the input molecule
+    list_of_decoded_smiles = list_of_decoded_smiles[1:len(list_of_decoded_smiles)]
 
-    # Compute fingerprints
-    print("Generating fingerprints...")
-    in_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in input_smiles]
-    out_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in list_of_decoded_smiles]
-
-    # Calculate similarity
-    for i in range(len(list_of_decoded_smiles)):
-        print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smiles[0], list_of_decoded_smiles[i], DataStructs.TanimotoSimilarity(in_fps[0], out_fps[i])))
-
-    print("Have a nice day :)")
+    # Similarity search
+    similarity_dataset = 0.5
+    output_smiles = []
+    fpe = FPSim2Engine(fp_filename)
+    for decoded_smile in list_of_decoded_smiles:
+        results = fpe.similarity(decoded_smile, similarity_dataset, n_workers=2)
+        results_smiles = []
+        for res in results:
+            if all(dataset_smiles[res[0]-1] != out_smi[0] for out_smi in output_smiles) and dataset_smiles[res[0]-1] != input_smile:
+                results_smiles.append(dataset_smiles[res[0]-1])
+        if len(results_smiles) == 0:
+            continue
+        res_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(res_smi)) for res_smi in results_smiles]
+        similarities = [DataStructs.TanimotoSimilarity(in_fps, out_fps) for out_fps in res_fps]
+        output_smiles.append([results_smiles[similarities.index(max(similarities))], max(similarities)])
+        
+    output_smiles.sort(key=lambda x : x[1],reverse=True)
+    # Print ouput
+    for i in range(len(output_smiles)):
+        print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smile, output_smiles[i][0], output_smiles[i][1]))

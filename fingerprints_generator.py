@@ -5,8 +5,11 @@ from FPSim2.io import create_db_file
 # ------------------------------- Code ------------------------------- #
 
 # Specify the paths for the database
-dataset_paths = ["Commercial_MWlower330.csv", "Commercial_MW330-500-1.csv", "Commercial_MW330-500-2.csv", "Commercial_MWhigher500.csv"]
-out1 = "fingerprints.h5"
+dataset_paths = ["\\dataset\\Commercial_MW\\Commercial_MWlower330.csv",
+                 "\\dataset\\Commercial_MW\\Commercial_MW330-500-1.csv",
+                 "\\dataset\\Commercial_MW\\Commercial_MW330-500-2.csv",
+                 "\\dataset\\Commercial_MW\\Commercial_MWhigher500.csv"]
+out1 = "\\dataset\\Commercial_MW\\fingerprints.h5"
 
 # List of input smiles strings
 input_smiles = []
