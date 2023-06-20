@@ -78,16 +78,16 @@ def addNoise(embedding, area):
 
         # Find the interval in which noise must be added
         if embedding[i]%interval_size < interval_size-embedding[i]%interval_size:
-            even = embedding[i]%interval_size
-            odd = interval_size-embedding[i]%interval_size
+            even = copy.deepcopy(embedding)[i]%interval_size
+            odd = interval_size - copy.deepcopy(embedding)[i]%interval_size
             is_near_lower = True
         else:
-            even = interval_size-embedding[i]%interval_size
-            odd = embedding[i]%interval_size
+            even = interval_size - copy.deepcopy(embedding)[i]%interval_size
+            odd = copy.deepcopy(embedding)[i]%interval_size
             is_near_lower = False
 
-        lower_bound = embedding[i]
-        upper_bound = embedding[i]
+        lower_bound = copy.deepcopy(embedding)[i]
+        upper_bound = copy.deepcopy(embedding)[i]
         current_area = 0
         j = 0
         while True:
@@ -130,7 +130,7 @@ def addNoise(embedding, area):
 
 def readDistributions():
     # Specify the paths for the database
-    path = "data analysis\\features_distribution_plots\\features_distributions.txt"
+    path = "..\\features_distribution_plots\\features_distributions.txt"
 
     # Open the file
     f = open(path,"r")
@@ -173,7 +173,7 @@ def readDistributions():
 
 def readDataset():
 
-    dataset_paths = ["dataset\\Commercial_MW\\Commercial_MWlower330.csv", "dataset\\Commercial_MW\\Commercial_MW330-500-1.csv", "dataset\\Commercial_MW\\Commercial_MW330-500-2.csv", "dataset\\Commercial_MW\\Commercial_MWhigher500.csv"]
+    dataset_paths = ["..\\..\\dataset\\Commercial_MW\\Commercial_MWlower330.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-1.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MW330-500-2.csv", "..\\..\\dataset\\Commercial_MW\\Commercial_MWhigher500.csv"]
 
     # List of input smiles strings
     dataset_smiles = []
@@ -205,68 +205,83 @@ if __name__ == '__main__':
     dataset_smiles = readDataset()
 
     # Specify the directory of the trained model
-    model_dir = "model"
+    model_dir = "..\\..\\model"
 
     # Specify the path for the file containing dataset fingerprints
-    fp_filename = 'fingerprints.h5'
+    fp_filename = '..\\..\\dataset\\Commercial_MW\\fingerprints.h5'
 
-    # Input smile
-    input_smile = "COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4"
-    in_fps = AllChem.RDKFingerprint(Chem.MolFromSmiles(input_smile)) 
+    # Output files
+    out1 = "noise_quality.txt"
+    out2 = "project_quality.txt"
 
-    print(f"Encoded: ",input_smile,"\n")
+    # Input smiles
+    # input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4", "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O", "C1CC(CN1)c2csc3ccccc23", "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2", "CC(C)CN1CCN(CC(=O)O)CC1", "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4", "Cc1cc(\C=C(/C#N)\c2ccccc2)c(C)n1c3ccccc3", "N[C@@H]1C[C@H](Br)C1", "CCOC(=O)[13CH2]C(=O)OCC", "Cc1nc2cc(Cl)ccc2n1CCN3CCCCC3"] 
+    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4", "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O"]
+    
+    fout1 = open(out1, "w")
+    fout2 = open(out2, "w")
 
-    # Using the model at model_dir path
-    with load_model_from_directory(model_dir) as model:
-        print()
+    for input_smile in input_smiles:
+        in_fps = AllChem.RDKFingerprint(Chem.MolFromSmiles(input_smile)) 
 
-        # Starting value for the area
-        area = 0.0
-        # Weights for finding/not finding duplicates
-        present = 0.005
-        not_present = -0.05
+        print(f"Encoded: ", input_smile,"\n")
+        fout1.write("I: {}\n".format(input_smile))
+        fout2.write("I: {}\n".format(input_smile))
 
-        print("Start encoding...")
-        # Process latent vector for each input smiles string
-        embedding = (model.encode([input_smile]))[0]
+        # Using the model at model_dir path
+        with load_model_from_directory(model_dir) as model:
+            print()
 
-        # Calculate molecules for each input smiles string,
-        # adding noise to the embeddings
-        list_of_decoded_smiles = []
-        print("Start adding noise...")
-        while area < 0.5:
-            area = max(area,0.0)
-            modified_molecule = (model.decode([addNoise(embedding,area)]))[0]
-            if modified_molecule in list_of_decoded_smiles:
-                area += present
-            else:
-                list_of_decoded_smiles.append(modified_molecule)
-                area += not_present
+            # Starting value for the area
+            area = 0.0
+            # Weights for finding/not finding duplicates
+            present = 0.005
+            not_present = -0.05
 
-    # The first element is always the input molecule
-    list_of_decoded_smiles = list_of_decoded_smiles[1:len(list_of_decoded_smiles)]
+            print("Start encoding...")
+            # Process latent vector for each input smiles string
+            embedding = (model.encode([input_smile]))[0]
 
-    # Similarity search
-    print("Start similarity...")
-    similarity_dataset = 0.5
-    max_num_of_SMILES = 5
-    output_smiles = []
-    fpe = FPSim2Engine(fp_filename)
-    for decoded_smile in list_of_decoded_smiles:
-        results = fpe.similarity(decoded_smile, similarity_dataset, n_workers=2)
-        results_smiles = []
-        for res in results:
-            if all(dataset_smiles[res[0]-1] != out_smi[0] for out_smi in output_smiles) and dataset_smiles[res[0]-1] != input_smile:
-                results_smiles.append(dataset_smiles[res[0]-1])
-                if len(results_smiles) >= max_num_of_SMILES:
-                    break
-        if len(results_smiles) == 0:
-            continue
-        res_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(res_smi)) for res_smi in results_smiles]
-        similarities = [DataStructs.TanimotoSimilarity(in_fps, out_fps) for out_fps in res_fps]
-        output_smiles.append([results_smiles[similarities.index(max(similarities))], max(similarities)])
-        
-    output_smiles.sort(key=lambda x : x[1],reverse=True)
-    # Print ouput
-    for i in range(len(output_smiles)):
-        print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smile, output_smiles[i][0], output_smiles[i][1]))
+            # Adding noise to the embeddings
+            list_of_decoded_smiles = []
+            print("Start adding noise...")
+            while area < 0.5:
+                area = max(area,0.0)
+                modified_molecule = (model.decode([addNoise(embedding, area)]))[0]
+                if modified_molecule in list_of_decoded_smiles:
+                    area += present
+                else:
+                    list_of_decoded_smiles.append(modified_molecule)
+                    fout1.write("O: {}, {}\n".format(modified_molecule, DataStructs.TanimotoSimilarity(in_fps, AllChem.RDKFingerprint(Chem.MolFromSmiles(modified_molecule)))))
+                    area += not_present
+
+        # The first element is always the input molecule
+        list_of_decoded_smiles = list_of_decoded_smiles[1:len(list_of_decoded_smiles)]
+
+        # Similarity search
+        similarity_dataset = 0.5
+        output_smiles = []
+        fpe = FPSim2Engine(fp_filename)
+        for decoded_smile in list_of_decoded_smiles:
+            results = fpe.similarity(decoded_smile, similarity_dataset, n_workers=2)
+            results_smiles = []
+            for res in results:
+                if all(dataset_smiles[res[0]-1] != out_smi[0] for out_smi in output_smiles) and dataset_smiles[res[0]-1] != input_smile:
+                    results_smiles.append(dataset_smiles[res[0]-1])
+            if len(results_smiles) == 0:
+                continue
+            res_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(res_smi)) for res_smi in results_smiles]
+            similarities = [DataStructs.TanimotoSimilarity(in_fps, out_fps) for out_fps in res_fps]
+            output_smiles.append([results_smiles[similarities.index(max(similarities))], max(similarities)])
+            
+        output_smiles.sort(key=lambda x : x[1],reverse=True)
+        # Print ouput
+        for i in range(len(output_smiles)):
+            print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smile, output_smiles[i][0], output_smiles[i][1]))
+            fout2.write("O: {}, {}\n".format(output_smiles[i][0], output_smiles[i][1]))
+
+        fout1.write("\n")
+        fout2.write("\n")
+
+    fout1.close()
+    fout2.close()

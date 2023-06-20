@@ -9,7 +9,7 @@ dataset_paths = ["\\dataset\\Commercial_MW\\Commercial_MWlower330.csv",
                  "\\dataset\\Commercial_MW\\Commercial_MW330-500-1.csv",
                  "\\dataset\\Commercial_MW\\Commercial_MW330-500-2.csv",
                  "\\dataset\\Commercial_MW\\Commercial_MWhigher500.csv"]
-out1 = "\\dataset\\Commercial_MW\\fingerprints.h5"
+out1 = "fingerprints.h5"
 
 # List of input smiles strings
 input_smiles = []

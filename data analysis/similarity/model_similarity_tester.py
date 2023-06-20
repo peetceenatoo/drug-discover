@@ -80,7 +80,7 @@ if __name__ == '__main__':
     f4.close()
 
     # Taking only num random smiles
-    num = 50000
+    num = 500
     random.shuffle(input_smiles)
     chosen_smiles_in = input_smiles[0:num]
 
