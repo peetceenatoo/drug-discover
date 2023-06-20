@@ -208,15 +208,14 @@ if __name__ == '__main__':
     model_dir = "..\\..\\model"
 
     # Specify the path for the file containing dataset fingerprints
-    fp_filename = '..\\..\\dataset\\Commercial_MW\\fingerprints.h5'
+    fp_filename = '..\\..fingerprints.h5'
 
     # Output files
     out1 = "noise_quality.txt"
     out2 = "project_quality.txt"
 
     # Input smiles
-    # input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4", "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O", "C1CC(CN1)c2csc3ccccc23", "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2", "CC(C)CN1CCN(CC(=O)O)CC1", "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4", "Cc1cc(\C=C(/C#N)\c2ccccc2)c(C)n1c3ccccc3", "N[C@@H]1C[C@H](Br)C1", "CCOC(=O)[13CH2]C(=O)OCC", "Cc1nc2cc(Cl)ccc2n1CCN3CCCCC3"] 
-    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4", "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O"]
+    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4", "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O", "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2", "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4", "Cc1cc(\C=C(/C#N)\c2ccccc2)c(C)n1c3ccccc3", "CCOC(=O)[13CH2]C(=O)OCC", "Cc1nc2cc(Cl)ccc2n1CCN3CCCCC3"] 
     
     fout1 = open(out1, "w")
     fout2 = open(out2, "w")
@@ -259,7 +258,9 @@ if __name__ == '__main__':
         list_of_decoded_smiles = list_of_decoded_smiles[1:len(list_of_decoded_smiles)]
 
         # Similarity search
+        print("Start similarity...")
         similarity_dataset = 0.5
+        max_num_of_SMILES = 5
         output_smiles = []
         fpe = FPSim2Engine(fp_filename)
         for decoded_smile in list_of_decoded_smiles:
@@ -268,6 +269,8 @@ if __name__ == '__main__':
             for res in results:
                 if all(dataset_smiles[res[0]-1] != out_smi[0] for out_smi in output_smiles) and dataset_smiles[res[0]-1] != input_smile:
                     results_smiles.append(dataset_smiles[res[0]-1])
+                    if len(results_smiles) >= max_num_of_SMILES:
+                        break
             if len(results_smiles) == 0:
                 continue
             res_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(res_smi)) for res_smi in results_smiles]
