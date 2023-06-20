@@ -247,7 +247,9 @@ if __name__ == '__main__':
     list_of_decoded_smiles = list_of_decoded_smiles[1:len(list_of_decoded_smiles)]
 
     # Similarity search
+    print("Start similarity...")
     similarity_dataset = 0.5
+    max_num_of_SMILES = 5
     output_smiles = []
     fpe = FPSim2Engine(fp_filename)
     for decoded_smile in list_of_decoded_smiles:
@@ -256,6 +258,8 @@ if __name__ == '__main__':
         for res in results:
             if all(dataset_smiles[res[0]-1] != out_smi[0] for out_smi in output_smiles) and dataset_smiles[res[0]-1] != input_smile:
                 results_smiles.append(dataset_smiles[res[0]-1])
+                if len(results_smiles) >= max_num_of_SMILES:
+                    break
         if len(results_smiles) == 0:
             continue
         res_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(res_smi)) for res_smi in results_smiles]
