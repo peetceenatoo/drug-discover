@@ -121,7 +121,13 @@ def addNoise(embedding, area):
 
     for j in range(len(embedding)):
         current_range = noise_intervals_lengths[j]
-        modified_embedding[j] += random.random()*current_range-current_range/2
+        if current_range > 0:
+            print("Feature n.{} - Current range {}".format(j+1, current_range))
+        temp = random.random()*current_range-current_range/2
+        if current_range > 0:
+            print("Adding {}".format(temp))
+        modified_embedding[j] += temp
+    print()
 
     # Return the embedding with noise addition
     return modified_embedding
@@ -211,8 +217,7 @@ if __name__ == '__main__':
     fp_filename = '..\\..\\fingerprints.h5'
 
     # Output files
-    out1 = "noise_quality.txt"
-    out2 = "project_quality.txt"
+    out = "project_quality.txt"
 
     # Input smiles
     input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4",
@@ -229,42 +234,16 @@ if __name__ == '__main__':
                     "CC(Nc1nc(Nc2ccc(F)cc2)nc(SCC(=O)Nc3ccc(F)cc3)n1)c4ccccc4",
                     "CCOc1ccc(CCNC(=O)COC(=O)c2ccncc2)cc1OCC",
                     "CCOC(=O)c1c(C)[nH]c(C)c1C(=O)CSc2ccccn2",
-                    "O=C(Nc1ccccc1)Nc2cc(nn2c3ccccc3)C4CC4",
-                    "CN(C)c1ccc(\C=N\\NC(=O)c2oc(Br)cc2)cc1",
-                    "O[C@@H](c1ccnc2ccccc12)C(F)(F)F",
-                    "CCOC(=O)N1CCN(CC1)C(=O)C2=CN(CC)c3ccc(cc3C2=O)S(=O)(=O)N4CCCCC4",
-                    "CC(C)(C)c1ccc(cc1)C(=O)N2CCN(CC2)c3ncccc3C(F)(F)F",
-                    "O[C@@H](c1ccc2ncccc2c1)C(F)(F)F",
-                    "CCOc1ccc(\C=N\\NC(=O)c2cc(OC)c(OC)c(OC)c2)cc1OC",
-                    "CN1CC(CC1=O)C(=O)NCc2ccc3CCCc3c2",
-                    "O=C(CC1N(CCNC1=O)S(=O)(=O)c2ccccc2)Nc3ccccn3",
-                    "Cc1c(sc2ccccc12)C(=O)NCCc3c(F)cccc3F",
-                    "CC(C)(C)OC(=O)N1CCCC[C@H]1C(=O)NCC2CCCO2",
-                    "CN(Cc1ccc(Cl)cc1)C(=O)c2oc3ccccc3c2",
-                    "Fc1ccc2[nH]c(CCC(=O)NCC(N3CCOCC3)c4ccccn4)nc2c1",
-                    "Clc1ccc(CC(=O)N2CCc3ccccc23)cc1",
-                    "Cc1[nH]c(nc1C(=O)N(CCO)CCO)c2cccc(Cl)c2",
-                    "Cc1cc(O)nc(SCC(=O)N2CCC(Cc3ccccc3)CC2)n1",
-                    "O=C(N\\N=C\c1cccc2ccccc12)C(=O)Nc3ccccc3",
-                    "CC(=O)N1CCC(C1)C(=O)Nc2n[nH]cc2Br",
-                    "CC(N1CCN(Cc2ccc(NC(=O)C)cc2)CC1)c3ccccn3",
-                    "O=C(Nc1ccccc1)Nc2cnn(CC3CCCCO3)c2",
-                    "CCOC(=O)C1CCN(CC1)C(=O)c2csc(n2)c3ccc(C)cc3C",
-                    "CC1=CN([C@@H]2O[C@H](CO)C(O)C2O)C(=O)NC1=O",
-                    "CN(C)c1ccc(Nc2nc(cs2)c3ccc(Cl)cc3)cc1",
-                    "CCn1c(SCc2cc(on2)c3ccccc3)nnc1c4ccoc4C",
-                    "CC(C)CN1CCC(CC1)C(=O)NCCN2CCC(C)CC2"] 
+                    "O=C(Nc1ccccc1)Nc2cc(nn2c3ccccc3)C4CC4"] 
     
-    fout1 = open(out1, "w")
-    fout2 = open(out2, "w")
+    fout = open(out, "w")
 
     for input_smile in input_smiles:
         in_fps = AllChem.RDKFingerprint(Chem.MolFromSmiles(input_smile)) 
 
         print(f"Encoded: ", input_smile,"\n")
-        fout1.write("I: {}\n".format(input_smile))
-        fout2.write("I: {}\n".format(input_smile))
-
+        fout.write("I: {}\n".format(input_smile))
+        
         # Using the model at model_dir path
         with load_model_from_directory(model_dir) as model:
             print()
@@ -284,13 +263,16 @@ if __name__ == '__main__':
             print("Start adding noise...")
             while area < 0.5:
                 area = max(area,0.0)
+                # It's useless to compute addNoise, better to just add "present" if area is 0...
+                if area > 0:
+                    print("Area: {}".format(area))
                 modified_molecule = (model.decode([addNoise(embedding, area)]))[0]
                 if modified_molecule in list_of_decoded_smiles:
                     area += present
                 else:
                     list_of_decoded_smiles.append(modified_molecule)
-                    fout1.write("O: {}, {}\n".format(modified_molecule, DataStructs.TanimotoSimilarity(in_fps, AllChem.RDKFingerprint(Chem.MolFromSmiles(modified_molecule)))))
                     area += not_present
+            print()
 
         # The first element is always the input molecule
         list_of_decoded_smiles = list_of_decoded_smiles[1:len(list_of_decoded_smiles)]
@@ -319,10 +301,8 @@ if __name__ == '__main__':
         # Print ouput
         for i in range(len(output_smiles)):
             print("Input molecule: {}\nOutput molecule: {}\nSimilarity: {}\n".format(input_smile, output_smiles[i][0], output_smiles[i][1]))
-            fout2.write("O: {}, {}\n".format(output_smiles[i][0], output_smiles[i][1]))
+            fout.write("O: {}, {}\n".format(output_smiles[i][0], output_smiles[i][1]))
 
-        fout1.write("\n")
-        fout2.write("\n")
+        fout.write("\n")
 
-    fout1.close()
-    fout2.close()
+    fout.close()

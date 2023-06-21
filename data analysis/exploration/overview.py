@@ -1,12 +1,11 @@
 
 # Specify the paths for the database
-path1 = "noise_quality.txt"
-path2 = "project_quality.txt"
+path = "project_quality.txt"
 
 print("# ----------- Let's compute data about the noise ----------- #")
 
 # Open the first file
-f = open(path1,"r")
+f = open(path,"r")
 
 # To compute average number of outputs
 input_count = 0
