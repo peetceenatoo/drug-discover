@@ -9,8 +9,11 @@ In this project, a generative approach was employed to explore the chemical spac
 ## How
 
 At the state of the art, two categories of models are distinguished in the generative approach: Variational Autoencoders (VAEs) and Generative Adversarial Networks (GANs).<br>
+
 Since GANs exhibit a high degree of specialization, making it more challenging to find a suitable network for specific objectives, we chose to adopt a VAE. In particular, we used [@molecule_generation](https://github.com/microsoft/molecule-generation), a Python implementation of the MoLeR model developed by Microsoft Research Department.<br>
+
 One method to address the problem of exploring a latent space involves calculating the minimum hypervolume containing the n nearest molecules to a given molecule. However, since the complexity of this problem is intractable, for the implementation of the project, we devised an approximate solution that reduces the set of molecules to be visited to a subset with computationally feasible dimensions and that contains all the molecules of greatest interest.<br>
+
 Subsequently, for each generated molecule, a representative is chosen from the most similar ones in the dataset to be displayed as output (specifically, the one most similar to the input molecule).<br>
 
 ## Dependencies
