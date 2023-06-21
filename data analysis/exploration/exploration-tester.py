@@ -42,7 +42,7 @@ distributions = []
 
 # ------------------------------ addNoise ------------------------------- #
 
-def addNoise(embedding, area):
+def addNoise(embedding, area,tail):
 
     global interval_size
     global magnitude
@@ -59,7 +59,7 @@ def addNoise(embedding, area):
         left_tail = 0
         count = 0
         for j in range(len(intervals)):
-            if count < area*2/3:
+            if count < area*tail:
                 count += current_feature_distribution[intervals[j]]
             else:
                 left_tail = intervals[j]
@@ -67,7 +67,7 @@ def addNoise(embedding, area):
         right_tail = 0
         count = 0
         for j in range(len(intervals)):
-            if count < area*2/3:
+            if count < area*tail:
                 count += current_feature_distribution[intervals[len(intervals)-1-j]]
             else:
                 right_tail = intervals[j]
@@ -121,11 +121,7 @@ def addNoise(embedding, area):
 
     for j in range(len(embedding)):
         current_range = noise_intervals_lengths[j]
-        if current_range > 0:
-            print("Feature n.{} - Current range {}".format(j+1, current_range))
         temp = random.random()*current_range-current_range/2
-        if current_range > 0:
-            print("Adding {}".format(temp))
         modified_embedding[j] += temp
     print()
 
@@ -224,17 +220,10 @@ if __name__ == '__main__':
                     "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O",
                     "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2",
                     "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4",
-                    "Cc1cc(\C=C(/C#N)\c2ccccc2)c(C)n1c3ccccc3",
                     "O=C(C1CCCCN1S(=O)(=O)c2ccccc2)N3CCN(CC3)C(=O)c4ccccc4",
                     "Fc1ccc(cc1)S(=O)(=O)N2CCC(CC2)C(=O)NCCC(=O)NCc3cccnc3",
                     "COc1ccc(CNC(=O)N2CCCN(CC2)C(=O)NCc3ccc(OC)cc3)cc1",
-                    "CCn1c(SCC(=O)c2cc(C)n(c2C)c3ccccc3)nnc1c4occc4",
-                    "CC(=O)OC[C@H]1O[C@H](OC(=O)C)[C@@H](OC(=O)C)[C@@H](OC(=O)C)C1OC(=O)C",
-                    "COc1ccc(NC(=O)C2CN(C)CC2c3ccccc3)cc1",
-                    "CC(Nc1nc(Nc2ccc(F)cc2)nc(SCC(=O)Nc3ccc(F)cc3)n1)c4ccccc4",
-                    "CCOc1ccc(CCNC(=O)COC(=O)c2ccncc2)cc1OCC",
-                    "CCOC(=O)c1c(C)[nH]c(C)c1C(=O)CSc2ccccn2",
-                    "O=C(Nc1ccccc1)Nc2cc(nn2c3ccccc3)C4CC4"] 
+                    "CCn1c(SCC(=O)c2cc(C)n(c2C)c3ccccc3)nnc1c4occc4"] 
     
     fout = open(out, "w")
 
@@ -264,13 +253,16 @@ if __name__ == '__main__':
             while area < 0.5:
                 area = max(area,0.0)
                 # It's useless to compute addNoise, better to just add "present" if area is 0...
-                if area > 0:
-                    print("Area: {}".format(area))
-                modified_molecule = (model.decode([addNoise(embedding, area)]))[0]
-                if modified_molecule in list_of_decoded_smiles:
+                print("Area: {}".format(area))
+                modified_molecule1 = (model.decode([addNoise(embedding, area,1/2)]))[0]
+                modified_molecule2 = (model.decode([addNoise(embedding, area,2/3)]))[0]
+                if (modified_molecule1 in list_of_decoded_smiles) and (modified_molecule2 in list_of_decoded_smiles):
                     area += present
                 else:
-                    list_of_decoded_smiles.append(modified_molecule)
+                    if (modified_molecule1 not in list_of_decoded_smiles):
+                        list_of_decoded_smiles.append(modified_molecule1)
+                    if (modified_molecule2 not in list_of_decoded_smiles):
+                        list_of_decoded_smiles.append(modified_molecule2)
                     area += not_present
             print()
 

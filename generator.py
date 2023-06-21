@@ -42,7 +42,7 @@ distributions = []
 
 # ------------------------------ addNoise ------------------------------- #
 
-def addNoise(embedding, area):
+def addNoise(embedding, area,tail):
 
     global interval_size
     global magnitude
@@ -59,7 +59,7 @@ def addNoise(embedding, area):
         left_tail = 0
         count = 0
         for j in range(len(intervals)):
-            if count < area*2/3:
+            if count < area*tail:
                 count += current_feature_distribution[intervals[j]]
             else:
                 left_tail = intervals[j]
@@ -67,7 +67,7 @@ def addNoise(embedding, area):
         right_tail = 0
         count = 0
         for j in range(len(intervals)):
-            if count < area*2/3:
+            if count < area*tail:
                 count += current_feature_distribution[intervals[len(intervals)-1-j]]
             else:
                 right_tail = intervals[j]
@@ -236,11 +236,15 @@ if __name__ == '__main__':
         print("Start adding noise...")
         while area < 0.5:
             area = max(area,0.0)
-            modified_molecule = (model.decode([addNoise(embedding,area)]))[0]
-            if modified_molecule in list_of_decoded_smiles:
+            modified_molecule1 = (model.decode([addNoise(embedding, area,1/2)]))[0]
+            modified_molecule2 = (model.decode([addNoise(embedding, area,2/3)]))[0]
+            if (modified_molecule1 in list_of_decoded_smiles) and (modified_molecule2 in list_of_decoded_smiles):
                 area += present
             else:
-                list_of_decoded_smiles.append(modified_molecule)
+                if (modified_molecule1 not in list_of_decoded_smiles):
+                    list_of_decoded_smiles.append(modified_molecule1)
+                if (modified_molecule2 not in list_of_decoded_smiles):
+                    list_of_decoded_smiles.append(modified_molecule2)
                 area += not_present
 
     # The first element is always the input molecule
