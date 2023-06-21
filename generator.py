@@ -59,7 +59,7 @@ def addNoise(embedding, area):
         left_tail = 0
         count = 0
         for j in range(len(intervals)):
-            if count < area/2:
+            if count < area*2/3:
                 count += current_feature_distribution[intervals[j]]
             else:
                 left_tail = intervals[j]
@@ -67,7 +67,7 @@ def addNoise(embedding, area):
         right_tail = 0
         count = 0
         for j in range(len(intervals)):
-            if count < area/2:
+            if count < area*2/3:
                 count += current_feature_distribution[intervals[len(intervals)-1-j]]
             else:
                 right_tail = intervals[j]
