@@ -216,14 +216,7 @@ if __name__ == '__main__':
     out = "project_quality.txt"
 
     # Input smiles
-    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4",
-                    "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O",
-                    "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2",
-                    "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4",
-                    "O=C(C1CCCCN1S(=O)(=O)c2ccccc2)N3CCN(CC3)C(=O)c4ccccc4",
-                    "Fc1ccc(cc1)S(=O)(=O)N2CCC(CC2)C(=O)NCCC(=O)NCc3cccnc3",
-                    "COc1ccc(CNC(=O)N2CCCN(CC2)C(=O)NCc3ccc(OC)cc3)cc1",
-                    "CCn1c(SCC(=O)c2cc(C)n(c2C)c3ccccc3)nnc1c4occc4"] 
+    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4"] 
     
     fout = open(out, "w")
 
@@ -253,7 +246,6 @@ if __name__ == '__main__':
             while area < 0.5:
                 area = max(area,0.0)
                 # It's useless to compute addNoise, better to just add "present" if area is 0...
-                print("Area: {}".format(area))
                 modified_molecule1 = (model.decode([addNoise(embedding, area,1/2)]))[0]
                 modified_molecule2 = (model.decode([addNoise(embedding, area,2/3)]))[0]
                 if (modified_molecule1 in list_of_decoded_smiles) and (modified_molecule2 in list_of_decoded_smiles):
