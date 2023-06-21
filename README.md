@@ -2,29 +2,24 @@
 
 ## Context
 
-Pharmaceutical companies do often own whole datasets of molecules which may be functional for the development of new revolutionary drugs, as vaccines, for example.<br>
-Altough, the cost of the realization, or the entire supply chain overall, is sometimes higher than the potential return, hence not actually functional.<br>
-Fortunately for humanity, there might be molecules which are "similar" to those who are notoriously functional which might work as well and do not require a long realization process.<br>
+Research and development of new drugs to combat diseases often require many years of work to achieve the desired success. In this context, artificial intelligence can provide valuable support. Pharmaceutical companies are engaged in the search for molecules that can be suitable for treating specific conditions, which, however, are often too costly to allow for a profit margin.<br>
+
+In this project, a generative approach was employed to explore the chemical space by generating molecules similar to an input molecule. However, since these compounds can be difficult to practically implement or expensive, a similarity search is then conducted within a given dataset containing easily and economically producible molecules.<br>
 
 ## How
 
-Generative models such as VAE (Variational AutoEncoders) are capable of encoding an input molecule into a set of features, to then decode such features and output a molecule which is just the same as the input molecule (or very similar)<br>
-Operating in the middle of this process, exploring the latent space by additioning some noise to the set of features, the operation of decoding will reasonably output very similar molecules to the input.<br>
-
-In fact, AI models are very likely to generate molecules which are even more expensive than the input one; at times the output molecules do not even exist. But through similarity measures such as Tanimoto Coefficient we can determine, among a dataset of "cheap molecules", the most similar to any of those which were part of the model's output.<br>
+At the state of the art, two categories of models are distinguished in the generative approach: Variational Autoencoders (VAEs) and Generative Adversarial Networks (GANs).<br>
+Since GANs exhibit a high degree of specialization, making it more challenging to find a suitable network for specific objectives, we chose to adopt a VAE. In particular, we used [@molecule_generation](https://github.com/microsoft/molecule-generation), a Python implementation of the MoLeR model developed by Microsoft Research Department.<br>
+One method to address the problem of exploring a latent space involves calculating the minimum hypervolume containing the n nearest molecules to a given molecule. However, since the complexity of this problem is intractable, for the implementation of the project, we devised an approximate solution that reduces the set of molecules to be visited to a subset with computationally feasible dimensions and that contains all the molecules of greatest interest.<br>
+Subsequently, for each generated molecule, a representative is chosen from the most similar ones in the dataset to be displayed as output (specifically, the one most similar to the input molecule).<br>
 
 ## Dependencies
 
-MoLeR: A model for Molecule Generation<br>
-https://github.com/microsoft/molecule-generation<br>
+Molecule Generation: A model for Molecule Generation<br>
+[@molecule_generation](https://github.com/microsoft/molecule-generation)
 
 NumPy: The fundamental package for scientific computing with Python<br>
-https://github.com/numpy/numpy<br>
-
-## Not ready-to-use
-
-This code uses now-deprecated functions (from the above-mentioned dependencies) and it is not scheduled yet that we look after it.<br>
-Hope it can be useful somehow, but we suggest that such code be responsibly used.
+[@numpy](https://github.com/numpy/numpy)<br>
 
 ## Credits
 
