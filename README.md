@@ -26,6 +26,9 @@ Once this is done, you can use the "generator.py" file to computationally genera
 Molecule Generation: A model for Molecule Generation<br>
 [@molecule_generation](https://github.com/microsoft/molecule-generation)
 
+FPSim2: Simple package for fast molecular similarity searches<br>
+[@FPSim2](https://github.com/chembl/FPSim2)
+
 NumPy: The fundamental package for scientific computing with Python<br>
 [@numpy](https://github.com/numpy/numpy)<br>
 
