@@ -208,14 +208,52 @@ if __name__ == '__main__':
     model_dir = "..\\..\\model"
 
     # Specify the path for the file containing dataset fingerprints
-    fp_filename = '..\\..fingerprints.h5'
+    fp_filename = '..\\..\\fingerprints.h5'
 
     # Output files
     out1 = "noise_quality.txt"
     out2 = "project_quality.txt"
 
     # Input smiles
-    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4", "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O", "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2", "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4", "Cc1cc(\C=C(/C#N)\c2ccccc2)c(C)n1c3ccccc3", "CCOC(=O)[13CH2]C(=O)OCC", "Cc1nc2cc(Cl)ccc2n1CCN3CCCCC3"] 
+    input_smiles = ["COc1ccccc1N2CCN(CC2)C(=O)c3ccc(nc3)c4cccs4",
+                    "CC(N1C(=S)S\C(=C/c2cccs2)\C1=O)C(=O)O",
+                    "COC(=O)c1ccccc1NC(=O)NCCc2ccc(Cl)cc2",
+                    "OC(CN1CCN(CC1)C(=O)c2ccc(nc2)n3ccnc3)c4ccccc4",
+                    "Cc1cc(\C=C(/C#N)\c2ccccc2)c(C)n1c3ccccc3",
+                    "O=C(C1CCCCN1S(=O)(=O)c2ccccc2)N3CCN(CC3)C(=O)c4ccccc4",
+                    "Fc1ccc(cc1)S(=O)(=O)N2CCC(CC2)C(=O)NCCC(=O)NCc3cccnc3",
+                    "COc1ccc(CNC(=O)N2CCCN(CC2)C(=O)NCc3ccc(OC)cc3)cc1",
+                    "CCn1c(SCC(=O)c2cc(C)n(c2C)c3ccccc3)nnc1c4occc4",
+                    "CC(=O)OC[C@H]1O[C@H](OC(=O)C)[C@@H](OC(=O)C)[C@@H](OC(=O)C)C1OC(=O)C",
+                    "COc1ccc(NC(=O)C2CN(C)CC2c3ccccc3)cc1",
+                    "CC(Nc1nc(Nc2ccc(F)cc2)nc(SCC(=O)Nc3ccc(F)cc3)n1)c4ccccc4",
+                    "CCOc1ccc(CCNC(=O)COC(=O)c2ccncc2)cc1OCC",
+                    "CCOC(=O)c1c(C)[nH]c(C)c1C(=O)CSc2ccccn2",
+                    "O=C(Nc1ccccc1)Nc2cc(nn2c3ccccc3)C4CC4",
+                    "CN(C)c1ccc(\C=N\\NC(=O)c2oc(Br)cc2)cc1",
+                    "O[C@@H](c1ccnc2ccccc12)C(F)(F)F",
+                    "CCOC(=O)N1CCN(CC1)C(=O)C2=CN(CC)c3ccc(cc3C2=O)S(=O)(=O)N4CCCCC4",
+                    "CC(C)(C)c1ccc(cc1)C(=O)N2CCN(CC2)c3ncccc3C(F)(F)F",
+                    "O[C@@H](c1ccc2ncccc2c1)C(F)(F)F",
+                    "CCOc1ccc(\C=N\\NC(=O)c2cc(OC)c(OC)c(OC)c2)cc1OC",
+                    "CN1CC(CC1=O)C(=O)NCc2ccc3CCCc3c2",
+                    "O=C(CC1N(CCNC1=O)S(=O)(=O)c2ccccc2)Nc3ccccn3",
+                    "Cc1c(sc2ccccc12)C(=O)NCCc3c(F)cccc3F",
+                    "CC(C)(C)OC(=O)N1CCCC[C@H]1C(=O)NCC2CCCO2",
+                    "CN(Cc1ccc(Cl)cc1)C(=O)c2oc3ccccc3c2",
+                    "Fc1ccc2[nH]c(CCC(=O)NCC(N3CCOCC3)c4ccccn4)nc2c1",
+                    "Clc1ccc(CC(=O)N2CCc3ccccc23)cc1",
+                    "Cc1[nH]c(nc1C(=O)N(CCO)CCO)c2cccc(Cl)c2",
+                    "Cc1cc(O)nc(SCC(=O)N2CCC(Cc3ccccc3)CC2)n1",
+                    "O=C(N\\N=C\c1cccc2ccccc12)C(=O)Nc3ccccc3",
+                    "CC(=O)N1CCC(C1)C(=O)Nc2n[nH]cc2Br",
+                    "CC(N1CCN(Cc2ccc(NC(=O)C)cc2)CC1)c3ccccn3",
+                    "O=C(Nc1ccccc1)Nc2cnn(CC3CCCCO3)c2",
+                    "CCOC(=O)C1CCN(CC1)C(=O)c2csc(n2)c3ccc(C)cc3C",
+                    "CC1=CN([C@@H]2O[C@H](CO)C(O)C2O)C(=O)NC1=O",
+                    "CN(C)c1ccc(Nc2nc(cs2)c3ccc(Cl)cc3)cc1",
+                    "CCn1c(SCc2cc(on2)c3ccccc3)nnc1c4ccoc4C",
+                    "CC(C)CN1CCC(CC1)C(=O)NCCN2CCC(C)CC2"] 
     
     fout1 = open(out1, "w")
     fout2 = open(out2, "w")
