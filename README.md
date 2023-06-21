@@ -16,6 +16,11 @@ One method to address the problem of exploring a latent space involves calculati
 
 Subsequently, for each generated molecule, a representative is chosen from the most similar ones in the dataset to be displayed as output (specifically, the one most similar to the input molecule).<br>
 
+## How to use
+
+To use the generator, it is first necessary to use the file "fingerprints_generator.py" to convert a file containing SMILES strings into a .h5 file, which will be used for the similarity search.
+Once this is done, you can use the "generator.py" file to computationally generate, given a SMILES string of a molecule, the strings in the dataset that most resemble the input molecule.
+
 ## Dependencies
 
 Molecule Generation: A model for Molecule Generation<br>
