@@ -42,23 +42,23 @@ if __name__ == '__main__':
     out1 = "features_distributions.txt"
 
     # Open the files
-    f1 = open(path1,"r")
-    f2 = open(path2,"r")
-    f3 = open(path3,"r")
-    f4 = open(path4,"r")
+    f1 = open(path1, "r")
+    f2 = open(path2, "r")
+    f3 = open(path3, "r")
+    f4 = open(path4, "r")
 
     # List of input smiles strings
     input_smiles = []
 
     # Read all the smiles
     for x in f1:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
     for x in f2:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
     for x in f3:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
     for x in f4:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
 
     # Close the files
     f1.close()
@@ -84,7 +84,9 @@ if __name__ == '__main__':
     min = copy.deepcopy(embeddings[0])
     max = copy.deepcopy(embeddings[0])
 
-    for i in range(1,num_of_chosen_molecules):
+    # For each chosen molecule
+    for i in range(1, num_of_chosen_molecules):
+        # Compute the min and max value for each feature
         for j in range(num_of_features):
             if embeddings[i][j] < min[j]:
                 min[j] = embeddings[i][j]
@@ -99,42 +101,39 @@ if __name__ == '__main__':
         factor = factor * 10
 
     # Open the output file
-    fout = open(out1,"w")
+    fout = open(out1, "w")
     fout.write("{}\n".format(interval))
 
-    # For each feature
+    # For each feature...
     for j in range(num_of_features):
 
         # Init x-axis data
         lower = round(min[j] - min[j]%interval + interval/2, magnitude)
         upper = round(max[j] - max[j]%interval + interval/2, magnitude)
-        fout.write("{}:".format(round(lower - interval/2,magnitude)))
+        fout.write("{}:".format(round(lower - interval/2, magnitude)))
 
         # Define x-axis
         x = list( range( (int)(lower*factor), (int)(upper*factor+1), (int)(interval*factor) ) )
         for k in range(len(x)):
             x[k] = x[k]/factor
 
-        # Init y-axis as list of len(x) elements
+        # Compute y-values (a list of len(x) elements)
         y = [0]*len(x)
-
         for i in range(num_of_chosen_molecules):
-
-            # Calculate the value on the y-axis
             k=0
-            while k<len(y) and embeddings[i][j] >= x[k]-interval/2:
+            while k < len(y) and embeddings[i][j] >= ( x[k] - interval/2 ):
                 k += 1
             y[k-1] += 1
 
-        # Set the data in percentage
+        # And finally set the data (percentage in the plots, decimal in the file)
         for k in range(len(y)):
             y[k] = y[k]/num_of_chosen_molecules
             fout.write("{};".format(y[k]))
             y[k] = y[k]*100
         fout.write("\n")
 
-        # Plot
-        plt.plot(x,y)
+        # Plot and save the file
+        plt.plot(x, y)
         plt.xlabel('feature values')
         plt.ylabel('feature counts in percentage')
         plt.title("feature n.{}".format(j+1))

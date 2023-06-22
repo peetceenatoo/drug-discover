@@ -29,10 +29,10 @@ path3 = "..\\..\\dataset\\Commercial_MW\Commercial_MW330-500-2.csv"
 path4 = "..\\..\\dataset\\Commercial_MW\Commercial_MWhigher500.csv"
 
 # Open the files to read
-f1 = open(path1,"r")
-f2 = open(path2,"r")
-f3 = open(path3,"r")
-f4 = open(path4,"r")
+f1 = open(path1, "r")
+f2 = open(path2, "r")
+f3 = open(path3, "r")
+f4 = open(path4, "r")
 
 # List of input smiles strings
 input_smiles = []
@@ -40,14 +40,15 @@ input_smiles = []
 # Read all the smiles
 print("Let'start reading from files...")
 
+# Read all the smiles from the input files
 for x in f1:
-    input_smiles.append(x.replace("\n",""))
+    input_smiles.append(x.replace("\n", ""))
 for x in f2:
-    input_smiles.append(x.replace("\n",""))
+    input_smiles.append(x.replace("\n", ""))
 for x in f3:
-    input_smiles.append(x.replace("\n",""))
+    input_smiles.append(x.replace("\n", ""))
 for x in f4:
-    input_smiles.append(x.replace("\n",""))
+    input_smiles.append(x.replace("\n", ""))
 
 # Close the file
 f1.close()
@@ -59,8 +60,10 @@ f4.close()
 print("Here we go!")
 print()
 
-indexes = [2079007,3304137,4720187]
+# Indexes of last singularities to be manually fixed
+indexes = [2079007, 3304137, 4720187]
 
+# Print current singular molecule and call Chem.MolFromSmiles to trigger an error eventually
 print("N. of indexes : {}".format(len(indexes)))
 temp = []
 for i in range(len(indexes)):

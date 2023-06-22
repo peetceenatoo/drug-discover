@@ -31,11 +31,13 @@ for row in f:
         output_count += 1
         input_quality[row.split(" ")[1]] = float(row.split(" ")[2])
 
-    # If done with the current input string, calculate quantities for current input string
+    # While, if done with the current input string, calculate quantities for current input string
     else:
+        # Set counters to 0
         counters[current_string] = {}
         for x in [0.9, 0.7, 0.5]:
             counters[current_string][x] = 0
+        # Count
         for output in input_quality:
             if input_quality[output] >= 0.9:
                 counters[current_string][0.9] += 1
@@ -43,21 +45,26 @@ for row in f:
                 counters[current_string][0.7] += 1
             elif input_quality[output] >= 0.5:
                 counters[current_string][0.5] += 1
+        # Print
         print("Above 0.9 there are {} mols".format(counters[current_string][0.9]))
         print("Above 0.7 there are {} mols".format(counters[current_string][0.7]))
         print("Above 0.5 there are {} mols".format(counters[current_string][0.5]))
         print()
+        # Reset input qualities for current string
         input_quality = {}
 
-# Final overview
+# Print final overview
 print("Average number of outputs for each input mol: {}".format(output_count/input_count))
+# Set sum to zero
 sum = {}
 for x in [0.9, 0.7, 0.5]:
     sum[x] = 0
+# Count
 for input in counters:
     sum[0.5] += counters[input][0.5]
     sum[0.7] += counters[input][0.7]
     sum[0.9] += counters[input][0.9]
+# Print average
 print("Average above 0.9 for each input mol: {}".format(sum[0.9]/input_count))
 print("Average above 0.7 for each input mol: {}".format(sum[0.7]/input_count))
 print("Average above 0.5 for each input mol: {}".format(sum[0.5]/input_count))

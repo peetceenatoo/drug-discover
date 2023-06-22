@@ -14,6 +14,7 @@ out1 = "fingerprints.h5"
 # List of input smiles strings
 input_smiles = []
 
+# For each dataset in the list
 i=1
 print("Start reading all the smiles...")
 for path in dataset_paths:
@@ -23,12 +24,12 @@ for path in dataset_paths:
 
     # Read all the smiles from f
     for x in f:
-        input_smiles.append([x.replace("\n",""),0+i])
+        # Append current SMILES at index i
+        input_smiles.append([x.replace("\n",""), 0+i])
         i +=1
         
-    #close the files
     f.close()
 
+# Create the .h5 file
 print("Start creating the database... Good luck!")
-
 create_db_file(input_smiles, out1, 'RDKit')

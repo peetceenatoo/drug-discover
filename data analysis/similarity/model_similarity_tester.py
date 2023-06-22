@@ -47,31 +47,30 @@ if __name__ == '__main__':
     # List of input smiles strings
     input_smiles = []
 
-    print("Opening the files...")
-
     # Open the files
-    f1 = open(path1,"r")
-    f2 = open(path2,"r")
-    f3 = open(path3,"r")
-    f4 = open(path4,"r")
+    print("Opening the files...")
+    f1 = open(path1, "r")
+    f2 = open(path2, "r")
+    f3 = open(path3, "r")
+    f4 = open(path4, "r")
 
     print("Start reading all the smiles...")
 
     # Read all the smiles from f1
     for x in f1:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
 
     # Read all the smiles from f2
     for x in f2:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
 
     # Read all the smiles from f3
     for x in f3:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
 
     # Read all the smiles from f4
     for x in f4:
-        input_smiles.append(x.replace("\n",""))
+        input_smiles.append(x.replace("\n", ""))
 
     # Close the files
     f1.close()
@@ -101,10 +100,11 @@ if __name__ == '__main__':
     in_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in chosen_smiles_in]
     out_fps = [AllChem.RDKFingerprint(Chem.MolFromSmiles(x)) for x in chosen_smiles_out]
 
-    out = open(out_path,"w")
+    # Init the .csv file
+    out = open(out_path, "w")
     out.write("Input Molecule,OutputMolecule,Tanimoto Distance\n")
 
-    # Calculate similarity
+    # Calculate similarity and write on the .csv file
     print("Printing output...")
     for i in range(len(chosen_smiles_in)):
         out.write("{},{},{}\n".format(chosen_smiles_in[i], chosen_smiles_out[i], DataStructs.TanimotoSimilarity(in_fps[i], out_fps[i])))
