@@ -19,9 +19,9 @@ The underlying idea is to add a layer to the "similarity search" based on the em
 
 ## How to use
 
-To use the generator, it is first necessary to use the file "fingerprints_generator.py" to convert the dataset of economically and synthetically feasible molecules containing SMILES strings into a .h5 file, which will be used for the similarity search.
+To use the generator, it is first necessary to use the file `fingerprints_generator.py` to convert the dataset of economically and synthetically feasible molecules containing SMILES strings into a .h5 file, which will be used for the similarity search.
 
-Once this is done, the "generator.py" script can be run to generate, given a SMILES string of a molecule, the molecules in the dataset that were discovered.
+Once this is done, the `generator.py` script can be run to generate, given a SMILES string of a molecule, the molecules in the dataset that were discovered.
 
 ## Dependencies
 
